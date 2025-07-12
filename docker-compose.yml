@@ -1,0 +1,48 @@
+services:
+    cf_redis:
+        image: redis:7-alpine
+        container_name: cf_redis
+        restart: unless-stopped
+        ports:
+            - ${REDIS_PORT}:6379
+        networks:
+            - cf-net
+        labels:
+            - io.portainer.accesscontrol.teams=Califit
+
+    cf_mongo:
+        container_name: cf_mongo
+        image: mongo:latest
+        restart: unless-stopped
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=$MONGO_LOGIN
+            - MONGO_INITDB_ROOT_PASSWORD=$MONGO_PASSWORD
+        ports:
+            - ${MONGO_PORT}:27017
+        networks:
+            - cf-net
+        labels:
+            - io.portainer.accesscontrol.teams=Califit
+
+    cf_server:
+        container_name: cf_server
+        build:
+            context: .
+            dockerfile: Dockerfile
+        env_file:
+            - .env
+        command: sh -c "npm run start:prod"
+        restart: always
+        ports:
+            - ${APP_PORT}:${APP_PORT}
+        networks:
+            - cf-net
+        depends_on:
+            - cf_mongo
+            - cf_redis
+        labels:
+            - io.portainer.accesscontrol.teams=Califit
+
+networks:
+    cf-net:
+        driver: bridge
