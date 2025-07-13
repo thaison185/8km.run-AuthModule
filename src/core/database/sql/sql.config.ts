@@ -15,6 +15,7 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
 	username: configService.get<string>("POSTGRES_USER"),
 	password: configService.get<string>("POSTGRES_PASSWORD"),
 	database: configService.get<string>("DB_NAME"),
+	ssl: configService.get<boolean>("POSTGRES_SSL", false),
 	synchronize: false,
 	entities,
 	migrations: ["dist/src/core/database/sql/migrations/*.js"],
