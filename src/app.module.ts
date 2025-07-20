@@ -3,9 +3,9 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { APP_PIPE } from "@nestjs/core";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ZodValidationPipe } from "nestjs-zod";
-import { MongooseConfigModule } from "./core/database/mongo";
 import { dataSourceOptions } from "./core/database/sql";
 import { AuthController } from "./mock/mock.controller";
+import { UserModule } from "./modules/user";
 
 @Module({
 	imports: [
@@ -16,7 +16,8 @@ import { AuthController } from "./mock/mock.controller";
 			inject: [ConfigService],
 			useFactory: async () => dataSourceOptions
 		}),
-		MongooseConfigModule
+		// MongooseConfigModule
+		UserModule
 	],
 	controllers: [AuthController],
 	providers: [{ provide: APP_PIPE, useClass: ZodValidationPipe }]

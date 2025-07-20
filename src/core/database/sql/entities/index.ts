@@ -5,6 +5,6 @@ import { LocationContact } from "./locationContact.entity";
 import { LocationDetail } from "./locationDetail.entity";
 import { Record } from "./record.entity";
 import { Region } from "./region.entity";
-import { User } from "./user.entity";
+import { User } from "./user/user.entity";
 
 export const entities = [User, Location, Donation, Event, Record, Region, LocationContact, LocationDetail];

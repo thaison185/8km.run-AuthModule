@@ -1,7 +1,7 @@
+import { Gender } from "src/common/enums";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Club } from "../models/club.model";
-import { Gender } from "../types/gender.enum";
-import { Record } from "./record.entity";
+import { Club } from "../../models/club.model";
+import { Record } from "../record.entity";
 
 @Entity("users")
 export class User {
