@@ -1,4 +1,4 @@
-import { Donation } from "./donation.entity";
+import { Donation } from "./donation/donation.entity";
 import { Event } from "./event.entity";
 import { Location } from "./location.entity";
 import { LocationContact } from "./locationContact.entity";

@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Donation } from "./donation.entity";
+import { Donation } from "./donation/donation.entity";
 import { Event } from "./event.entity";
 import { LocationContact } from "./locationContact.entity";
 import { LocationDetail } from "./locationDetail.entity";

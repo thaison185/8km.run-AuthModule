@@ -1,8 +1,8 @@
-import { EntityManager, FindManyOptions, FindOptionsRelations, UpdateResult } from "typeorm";
+import { DeepPartial, EntityManager, FindManyOptions, FindOptionsRelations, UpdateResult } from "typeorm";
 import { ID } from "./id";
 
 export interface IBaseCRUD<T, TValue = ID> {
-	create(body: Partial<T>, manager?: EntityManager): Promise<T>;
+	create(body: DeepPartial<T>, manager?: EntityManager): Promise<T>;
 	isExist(id: TValue, manager?: EntityManager): Promise<boolean>;
 	getById(
 		id: TValue,
