@@ -41,6 +41,6 @@ export class User {
 	@OneToMany(() => Record, (record) => record.user)
 	records: Record[];
 
-	@Column({ nullable: false })
+	@Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", nullable: false })
 	createdAt: Date;
 }

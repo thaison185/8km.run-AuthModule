@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, NotFoundException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as argon2 from 'argon2';
@@ -19,6 +19,7 @@ export class AuthService {
     @InjectRepository(RefreshToken)
     private readonly refreshTokenRepo: Repository<RefreshToken>,
     private readonly jwtService: JwtService,
+    @Inject(JwtConfig.KEY)  
     private readonly jwtConfiguration: ConfigType<typeof JwtConfig>,
     ) {}
 
@@ -65,15 +66,11 @@ export class AuthService {
         const hashedPassword = await argon2.hash(registerDto.password, {type: argon2.argon2id});
 
         // Return User[] here
-        const user = this.userRepo.create({
-            ...registerDto,
-            password: hashedPassword,
-        });
-
-        await this.userRepo.save(user);
+        const userEntity = this.userRepo.create({ ...registerDto, password: hashedPassword });
+        const user = await this.userRepo.save(userEntity);
 
         // But generateTokens need User param
-        return this.generateTokens(user[0]);
+        return this.generateTokens(user);
     }
 
     private async generateTokens(user: User): Promise<LoginResponseDto> {

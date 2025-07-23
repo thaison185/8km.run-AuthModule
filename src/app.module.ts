@@ -6,6 +6,7 @@ import { ZodValidationPipe } from "nestjs-zod";
 import { dataSourceOptions } from "./core/database/sql";
 import { AuthController } from "./mock/mock.controller";
 import { UserModule } from "./modules/user";
+import { AuthModule } from "./modules/auth/auth.module";
 
 @Module({
 	imports: [
@@ -17,7 +18,9 @@ import { UserModule } from "./modules/user";
 			useFactory: async () => dataSourceOptions
 		}),
 		// MongooseConfigModule
-		UserModule
+		UserModule,
+
+		AuthModule,
 	],
 	controllers: [AuthController],
 	providers: [{ provide: APP_PIPE, useClass: ZodValidationPipe }]
