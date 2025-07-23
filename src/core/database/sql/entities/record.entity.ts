@@ -1,11 +1,17 @@
 import { Role } from "src/common/enums";
-import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { Badge } from "../models/badge.model";
 import { Event } from "./event.entity";
 import { User } from "./user/user.entity";
 
 @Entity("records")
 export class Record {
+	@PrimaryColumn('uuid')
+  	user_id: string;
+
+  	@PrimaryColumn('uuid')
+  	event_id: string;
+
 	@ManyToOne(() => User, (user) => user.records)
 	@JoinColumn({ name: "user_id" })
 	user: User;
