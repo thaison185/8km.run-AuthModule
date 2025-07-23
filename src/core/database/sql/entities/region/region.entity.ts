@@ -1,12 +1,12 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Location } from "./location.entity";
+import { Location } from "../location/location.entity";
 
 @Entity("regions")
 export class Region {
 	@PrimaryGeneratedColumn("uuid")
 	id: string;
 
-	@Column({ nullable: false, unique: true })
+	@Column({ type: "varchar", nullable: false, unique: true })
 	name: string;
 
 	@OneToMany(() => Location, (location) => location.region)

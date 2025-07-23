@@ -1,8 +1,8 @@
 import { Role } from "src/common/enums";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
-import { Badge } from "../models/badge.model";
-import { Event } from "./event.entity";
-import { User } from "./user/user.entity";
+import { Badge } from "../../models/badge.model";
+import { Event } from "../event/event.entity";
+import { User } from "../user/user.entity";
 
 @Entity("records")
 export class Record {

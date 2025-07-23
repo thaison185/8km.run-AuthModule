@@ -1,6 +1,5 @@
-import { Column, Entity } from "typeorm";
+import { Column } from "typeorm";
 
-@Entity("location_contacts")
 export class LocationContact {
 	@Column({ nullable: false })
 	contactName: string;

@@ -1,9 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Donation } from "./donation/donation.entity";
-import { Event } from "./event.entity";
-import { LocationContact } from "./locationContact.entity";
-import { LocationDetail } from "./locationDetail.entity";
-import { Region } from "./region.entity";
+import { LocationContact } from "../../models/locationContact.model";
+import { Donation } from "../donation/donation.entity";
+import { Event } from "../event/event.entity";
+import { LocationDetail } from "../locationDetail/locationDetail.entity";
+import { Region } from "../region/region.entity";
 
 @Entity("locations")
 export class Location {
@@ -14,13 +14,13 @@ export class Location {
 	@JoinColumn({ name: "region_id" })
 	region: Region;
 
-	@Column({ nullable: false, unique: true })
+	@Column({ type: "varchar", nullable: false, unique: true })
 	name: string;
 
-	@Column({ nullable: false })
+	@Column({ type: "varchar", nullable: false })
 	address: string;
 
-	@Column({ nullable: false })
+	@Column({ type: "varchar", nullable: false })
 	coordinate: string;
 
 	@Column({ type: "text" })

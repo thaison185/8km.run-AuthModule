@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Location } from "./location.entity";
-import { Record } from "./record.entity";
+import { Location } from "../location/location.entity";
+import { Record } from "../record/record.entity";
 
 @Entity("events")
 export class Event {
@@ -11,10 +11,10 @@ export class Event {
 	@JoinColumn({ name: "location_id" })
 	location: Location;
 
-	@Column({ nullable: false, unique: true })
+	@Column({ type: "varchar", nullable: false, unique: true })
 	name: string;
 
-	@Column({ nullable: false })
+	@Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", nullable: false })
 	date: Date;
 
 	@OneToMany(() => Record, (record) => record.event)

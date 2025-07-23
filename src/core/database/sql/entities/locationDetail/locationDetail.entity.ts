@@ -1,5 +1,5 @@
 import { Entity, JoinColumn, ManyToOne } from "typeorm";
-import { Location } from "./location.entity";
+import { Location } from "../location/location.entity";
 
 @Entity("location_details")
 export class LocationDetail {
