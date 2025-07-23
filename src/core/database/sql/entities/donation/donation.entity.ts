@@ -1,6 +1,6 @@
 import { ID } from "src/common/types";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Location } from "../location/location.entity";
+import { Location } from "../location";
 
 @Entity("donations")
 export class Donation {

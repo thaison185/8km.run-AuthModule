@@ -1,9 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { LocationContact } from "../../models/locationContact.model";
-import { Donation } from "../donation/donation.entity";
-import { Event } from "../event/event.entity";
-import { LocationDetail } from "../locationDetail/locationDetail.entity";
-import { Region } from "../region/region.entity";
+import { Donation } from "../donation";
+import { Event } from "../event";
+import { LocationDetail } from "../locationDetail";
+import { Region } from "../region";
 
 @Entity("locations")
 export class Location {

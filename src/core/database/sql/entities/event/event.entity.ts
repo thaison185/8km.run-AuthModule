@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Location } from "../location/location.entity";
-import { Record } from "../record/record.entity";
+import { Location } from "../location";
+import { Record } from "../record";
 
 @Entity("events")
 export class Event {
