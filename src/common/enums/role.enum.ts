@@ -1,5 +1,5 @@
 export enum Role {
-	Runner = "runner",
-	Organizer = "organizer",
-	Volunteer = "volunteer"
+	Organizer = 0,
+	Volunteer = 1,
+	Runner = 2
 }
