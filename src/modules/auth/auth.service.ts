@@ -8,7 +8,7 @@ import { User } from 'src/core/database/sql/entities/user';
 import { RefreshToken } from 'src/core/database/sql/entities/refresh-token';
 import { JwtConfig } from 'src/common/config';
 import { ConfigType } from '@nestjs/config';
-import { LoginRequestDto, LoginResponseDto, RefreshTokenDto } from './dtos';
+import { LoginRequestDto, LoginResponseDto, RefreshTokenDto, RegisterRequestDto } from './dtos';
 
 
 @Injectable()
@@ -40,6 +40,40 @@ export class AuthService {
     if (!valid) throw new UnauthorizedException('Credentials incorrect');
 
     return this.generateTokens(user);
+    }
+
+    // Dummy Logout for testing
+    async logout(user_id: string): Promise<void> {
+        // Delete all refresh tokens for this user
+        await this.refreshTokenRepo.delete({ user_id });
+    }
+
+    // Dummy register for testing
+    async register(registerDto: RegisterRequestDto): Promise<LoginResponseDto> {
+        // Check if user already exists
+        const existingUser = await this.userRepo.findOne({
+            where: [
+                { phone: registerDto.phone }
+            ]
+        });
+
+        if (existingUser) {
+            throw new UnauthorizedException('User with this phone number already exists');
+        }
+
+        // Hash password with Argon2
+        const hashedPassword = await argon2.hash(registerDto.password, {type: argon2.argon2id});
+
+        // Return User[] here
+        const user = this.userRepo.create({
+            ...registerDto,
+            password: hashedPassword,
+        });
+
+        await this.userRepo.save(user);
+
+        // But generateTokens need User param
+        return this.generateTokens(user[0]);
     }
 
     private async generateTokens(user: User): Promise<LoginResponseDto> {
