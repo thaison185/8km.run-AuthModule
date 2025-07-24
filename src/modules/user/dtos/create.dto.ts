@@ -10,7 +10,7 @@ const schema = z.object({
 	firstname: z.string().trim().min(1).max(50),
 	lastname: z.string().trim().min(1).max(50),
 	dob: z.string().datetime().optional(),
-	gender: z.enum([Gender.MALE, Gender.FEMALE, Gender.OTHER]).optional(),
+	gender: z.nativeEnum(Gender).optional(),
 	is_pic: z.boolean().optional(),
 	qrCode: z.string().trim().max(100).optional()
 });

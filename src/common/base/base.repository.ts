@@ -4,41 +4,25 @@ import { IBaseCRUD, ID } from "../types";
 export class BaseRepository<T, TValue = ID> implements IBaseCRUD<T, TValue> {
 	constructor(protected readonly repository: Repository<T>) {}
 
+	protected getManager(manager?: EntityManager): EntityManager {
+		return manager || this.repository.manager;
+	}
+
 	create(body: DeepPartial<T>, manager?: EntityManager): Promise<T> {
 		const entity = this.repository.create(body);
-		return (manager || this.repository.manager).save(entity);
+		return this.getManager(manager).save(entity);
 	}
 
-	save(entity: T) {
-		return this.repository.save(entity);
+	save(entity: T, manager?: EntityManager) {
+		return this.getManager(manager).save(entity);
 	}
-
-	// isExist(id: TValue, manager?: EntityManager): Promise<boolean> {
-	// 	return (manager || this.repository.manager).findOneBy(this.repository.target, { id } as any).then(Boolean);
-	// }
 
 	getById(id: TValue, relations?: string[] | FindOptionsRelations<T>, manager?: EntityManager): Promise<T | null> {
-		return (manager || this.repository.manager).findOne(this.repository.target, {
+		return this.getManager(manager).findOne(this.repository.target, {
 			where: { id } as any,
 			relations
 		});
 	}
-
-	// getByKey<K extends keyof T>(
-	// 	key: K,
-	// 	value: string | TValue | boolean,
-	// 	relations?: string[] | FindOptionsRelations<T>,
-	// 	manager?: EntityManager
-	// ): Promise<T[]> {
-	// 	return (manager || this.repository.manager).find(this.repository.target, {
-	// 		where: { [key]: value } as any,
-	// 		relations
-	// 	});
-	// }
-
-	// count(where?: any, manager?: EntityManager): Promise<number> {
-	// 	return (manager || this.repository.manager).count(this.repository.target, { where });
-	// }
 
 	list(
 		limit: number,
@@ -47,7 +31,7 @@ export class BaseRepository<T, TValue = ID> implements IBaseCRUD<T, TValue> {
 		order?: any,
 		manager?: EntityManager
 	): Promise<T[]> {
-		return (manager || this.repository.manager).find(this.repository.target, {
+		return this.getManager(manager).find(this.repository.target, {
 			...(options || {}),
 			take: limit,
 			skip: offset,
@@ -56,19 +40,6 @@ export class BaseRepository<T, TValue = ID> implements IBaseCRUD<T, TValue> {
 	}
 
 	listAll(where?: any, relations?: string[] | FindOptionsRelations<T>, manager?: EntityManager): Promise<T[]> {
-		return (manager || this.repository.manager).find(this.repository.target, { where, relations });
+		return this.getManager(manager).find(this.repository.target, { where, relations });
 	}
-
-	// async updateById(
-	// id: TValue,
-	// doc: QueryDeepPartialEntity<Omit<T, "id" | "created">>,
-	// manager?: EntityManager
-	// ): Promise<T | null> {
-	// 	await (manager || this.repository.manager).update(this.repository.target, { id } as any, doc);
-	// 	return this.getById(id, [], manager);
-	// }
-
-	// async deleteById(id: TValue | TValue[], manager?: EntityManager): Promise<void> {
-	// 	await (manager || this.repository.manager).delete(this.repository.target, id);
-	// }
 }
