@@ -1,16 +1,23 @@
 import { Role } from "src/common/enums";
-import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { ID } from "src/common/types";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { Badge } from "../../models/badge.model";
 import { Event } from "../event";
 import { User } from "../user";
 
 @Entity("records")
 export class Record {
-	@ManyToOne(() => User, (user) => user.records)
+	@PrimaryColumn({ name: "user_id", type: "uuid" })
+	userId: ID;
+
+	@PrimaryColumn({ name: "event_id", type: "uuid" })
+	eventId: ID;
+
+	@ManyToOne(() => User, (user) => user.records, { onDelete: "CASCADE" })
 	@JoinColumn({ name: "user_id" })
 	user: User;
 
-	@ManyToOne(() => Event, (event) => event.records)
+	@ManyToOne(() => Event, (event) => event.records, { onDelete: "CASCADE" })
 	@JoinColumn({ name: "event_id" })
 	event: Event;
 

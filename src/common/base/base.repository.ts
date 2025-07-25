@@ -1,11 +1,19 @@
-import { DeepPartial, EntityManager, FindManyOptions, FindOptionsRelations, Repository } from "typeorm";
+import {
+	DeepPartial,
+	EntityManager,
+	FindManyOptions,
+	FindOptionsRelations,
+	FindOptionsWhere,
+	Repository
+} from "typeorm";
 import { IBaseCRUD, ID } from "../types";
 
 export class BaseRepository<T, TValue = ID> implements IBaseCRUD<T, TValue> {
 	constructor(protected readonly repository: Repository<T>) {}
 
+	// helper
 	protected getManager(manager?: EntityManager): EntityManager {
-		return manager || this.repository.manager;
+		return manager ?? this.repository.manager;
 	}
 
 	create(body: DeepPartial<T>, manager?: EntityManager): Promise<T> {
@@ -19,7 +27,7 @@ export class BaseRepository<T, TValue = ID> implements IBaseCRUD<T, TValue> {
 
 	getById(id: TValue, relations?: string[] | FindOptionsRelations<T>, manager?: EntityManager): Promise<T | null> {
 		return this.getManager(manager).findOne(this.repository.target, {
-			where: { id } as any,
+			where: id as FindOptionsWhere<T>,
 			relations
 		});
 	}
@@ -39,7 +47,11 @@ export class BaseRepository<T, TValue = ID> implements IBaseCRUD<T, TValue> {
 		});
 	}
 
-	listAll(where?: any, relations?: string[] | FindOptionsRelations<T>, manager?: EntityManager): Promise<T[]> {
+	listAll(
+		where?: FindOptionsWhere<T> | FindOptionsWhere<T>[],
+		relations?: string[] | FindOptionsRelations<T>,
+		manager?: EntityManager
+	): Promise<T[]> {
 		return this.getManager(manager).find(this.repository.target, { where, relations });
 	}
 }
