@@ -24,10 +24,10 @@ export class User {
 	@Column({ type: "varchar", nullable: false })
 	lastname: string;
 
-	@Column({ type: "date", nullable: false })
+	@Column({ type: "date", nullable: true })
 	dob: Date;
 
-	@Column({ type: "enum", nullable: false, enum: Gender })
+	@Column({ type: "enum", nullable: true, enum: Gender })
 	gender: Gender;
 
 	@Column({ type: "boolean", nullable: true })

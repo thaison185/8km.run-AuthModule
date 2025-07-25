@@ -3,7 +3,6 @@ import { Gender } from "src/common/enums";
 import { z } from "zod";
 
 const schema = z.object({
-	name: z.string().trim().min(3).max(20),
 	password: z.string().trim().min(8).max(128),
 	email: z.string().email().trim().max(50),
 	phone: z.string().trim().min(10).max(15),
