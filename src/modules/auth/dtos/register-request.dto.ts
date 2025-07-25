@@ -8,12 +8,7 @@ const RegisterSchema = z.object({
     phone: z.string().trim().min(10).max(15),
     firstname: z.string().trim().min(1).max(50),
     lastname: z.string().trim().min(1).max(50),
-    dob: z.string().refine(val => {
-        const regex = /^\d{4}-\d{2}-\d{2}$/;
-        if (!regex.test(val)) return false;
-        const date = new Date(val);
-        return !Number.isNaN(date.getTime());
-    }),
+    dob: z.string().date(),
     gender: z.enum([Gender.MALE, Gender.FEMALE, Gender.OTHER]).optional(),
     is_pic: z.boolean().optional(),
     qrCode: z.string().trim().max(100).optional()

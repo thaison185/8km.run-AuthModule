@@ -1,38 +1,39 @@
 import { Gender } from "src/common/enums";
+import { ID } from "src/common/types";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Club } from "../../models/club.model";
-import { Record } from "../record.entity";
+import { Record } from "../record";
 
 @Entity("users")
 export class User {
 	@PrimaryGeneratedColumn("uuid")
-	id: string;
+	id: ID;
 
-	@Column({ nullable: false, unique: true })
+	@Column({ type: "varchar", nullable: false, unique: true })
 	email: string;
 
-	@Column({ nullable: false, unique: true })
+	@Column({ type: "varchar", nullable: false, unique: true })
 	phone: string;
 
-	@Column({ nullable: false})
+	@Column({ type: "varchar", nullable: false })
 	password: string;
 
-	@Column({ nullable: false })
+	@Column({ type: "varchar", nullable: false })
 	firstname: string;
 
-	@Column({ nullable: false })
+	@Column({ type: "varchar", nullable: false })
 	lastname: string;
 
-	@Column({ nullable: false })
+	@Column({ type: "date", nullable: true })
 	dob: Date;
 
-	@Column({ nullable: false, enum: Gender, type: "enum" })
+	@Column({ type: "enum", nullable: true, enum: Gender })
 	gender: Gender;
 
-	@Column({ nullable: true })
+	@Column({ type: "boolean", nullable: true })
 	is_pic: boolean;
 
-	@Column({ nullable: true, unique: true })
+	@Column({ type: "varchar", nullable: true, unique: true }) // length
 	qrCode: string;
 
 	@Column({ type: "json", nullable: true })
