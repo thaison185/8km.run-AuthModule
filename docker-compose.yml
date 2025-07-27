@@ -1,48 +1,49 @@
-services:
-    cf_redis:
-        image: redis:7-alpine
-        container_name: cf_redis
-        restart: unless-stopped
-        ports:
-            - ${REDIS_PORT}:6379
-        networks:
-            - cf-net
-        labels:
-            - io.portainer.accesscontrol.teams=Califit
-
-    cf_mongo:
-        container_name: cf_mongo
-        image: mongo:latest
-        restart: unless-stopped
-        environment:
-            - MONGO_INITDB_ROOT_USERNAME=$MONGO_LOGIN
-            - MONGO_INITDB_ROOT_PASSWORD=$MONGO_PASSWORD
-        ports:
-            - ${MONGO_PORT}:27017
-        networks:
-            - cf-net
-        labels:
-            - io.portainer.accesscontrol.teams=Califit
-
-    cf_server:
-        container_name: cf_server
-        build:
-            context: .
-            dockerfile: Dockerfile
-        env_file:
-            - .env
-        command: sh -c "npm run start:prod"
-        restart: always
-        ports:
-            - ${APP_PORT}:${APP_PORT}
-        networks:
-            - cf-net
-        depends_on:
-            - cf_mongo
-            - cf_redis
-        labels:
-            - io.portainer.accesscontrol.teams=Califit
-
-networks:
-    cf-net:
-        driver: bridge
+name: Backend CI/CD
+on:
+    push:
+        branches: [main]
+jobs:
+    build-and-test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: "18"
+            - name: Install dependencies
+              run: npm ci
+            - name: Run tests
+              run: npm test
+            - name: Build Docker image
+              run: docker build -t 8kmrun/backend-app:$GITHUB_SHA .
+            - name: Push to Docker Hub
+              env:
+                  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+                  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+              run: |
+                  echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                  docker push 8kmrun/backend-app:$GITHUB_SHA
+    deploy:
+        needs: build-and-test
+        runs-on: ubuntu-latest
+        steps:
+            - name: Deploy to VPS
+              env:
+                  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+                  VPS_HOST: ${{ secrets.VPS_HOST }}
+                  VPS_USER: ${{ secrets.VPS_USER }}
+              run: |
+                  echo "$SSH_PRIVATE_KEY" | ssh-add -
+                  ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
+                    docker pull 8kmrun/backend-app:$GITHUB_SHA
+                    docker stop backend || true
+                    docker rm backend || true
+                    docker run -d --name backend \
+                      -p 3000:3000 \
+                      --env DATABASE_URL=${{ secrets.DATABASE_URL }} \
+                      --env REDIS_URL=${{ secrets.REDIS_URL }} \
+                      --env NODE_ENV=development \
+                      --restart always \
+                      8kmrun/backend-app:$GITHUB_SHA
+                  EOF
