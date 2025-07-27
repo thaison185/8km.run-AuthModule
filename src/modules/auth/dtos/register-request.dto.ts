@@ -8,10 +8,11 @@ const RegisterSchema = z.object({
     phone: z.string().trim().min(10).max(15),
     firstname: z.string().trim().min(1).max(50),
     lastname: z.string().trim().min(1).max(50),
-    dob: z.string().date(),
-    gender: z.enum([Gender.MALE, Gender.FEMALE, Gender.OTHER]).optional(),
+    dob: z.string().date().optional(),
+    gender: z.nativeEnum(Gender).optional(),
     is_pic: z.boolean().optional(),
     qrCode: z.string().trim().max(100).optional()
 });
 
 export class RegisterRequestDto extends createZodDto(RegisterSchema) {}
+
