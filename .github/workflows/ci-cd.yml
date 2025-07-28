@@ -32,6 +32,7 @@ jobs:
     deploy:
         needs: build-and-push
         runs-on: ubuntu-latest
+        enviroment: dev
         steps:
             - name: Deploy to VPS
               env:
