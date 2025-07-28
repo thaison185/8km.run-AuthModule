@@ -28,6 +28,8 @@ jobs:
                   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
                   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
               run: |
+                  echo "Username: $DOCKER_USERNAME"
+                  echo "Pushing to: phanmhung/backend-app:$GITHUB_SHA"
                   echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
                   docker push phanmhung/backend-app:$GITHUB_SHA
     deploy:
@@ -43,8 +45,9 @@ jobs:
                   DATABASE_URL: ${{ secrets.DATABASE_URL }}
                   REDIS_URL: ${{ secrets.REDIS_URL }}
               run: |
-                  echo "$SSH_PRIVATE_KEY" | ssh-add -
-                  ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
+                  echo "$SSH_PRIVATE_KEY" > ~/ssh_key
+                  chmod 600 ~/ssh_key
+                  ssh -i ~/ssh_key -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
                     docker pull phanmhung/backend-app:$GITHUB_SHA
                     docker stop backend || true
                     docker rm backend || true
@@ -57,3 +60,4 @@ jobs:
                       phanmhung/backend-app:$GITHUB_SHA
                     docker exec backend npm run migrate:up
                   EOF
+                  rm ~/ssh_key
