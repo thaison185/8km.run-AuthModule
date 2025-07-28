@@ -32,7 +32,7 @@ jobs:
     deploy:
         needs: build-and-push
         runs-on: ubuntu-latest
-        enviroment: dev
+        environment: dev
         steps:
             - name: Deploy to VPS
               env:
