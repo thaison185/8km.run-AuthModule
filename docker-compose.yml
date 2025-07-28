@@ -1,49 +1,31 @@
-name: Backend CI/CD
-on:
-    push:
-        branches: [main]
-jobs:
-    build-and-test:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v3
-            - name: Set up Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: "18"
-            - name: Install dependencies
-              run: npm ci
-            - name: Run tests
-              run: npm test
-            - name: Build Docker image
-              run: docker build -t 8kmrun/backend-app:$GITHUB_SHA .
-            - name: Push to Docker Hub
-              env:
-                  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-                  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-              run: |
-                  echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-                  docker push 8kmrun/backend-app:$GITHUB_SHA
-    deploy:
-        needs: build-and-test
-        runs-on: ubuntu-latest
-        steps:
-            - name: Deploy to VPS
-              env:
-                  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-                  VPS_HOST: ${{ secrets.VPS_HOST }}
-                  VPS_USER: ${{ secrets.VPS_USER }}
-              run: |
-                  echo "$SSH_PRIVATE_KEY" | ssh-add -
-                  ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
-                    docker pull 8kmrun/backend-app:$GITHUB_SHA
-                    docker stop backend || true
-                    docker rm backend || true
-                    docker run -d --name backend \
-                      -p 3000:3000 \
-                      --env DATABASE_URL=${{ secrets.DATABASE_URL }} \
-                      --env REDIS_URL=${{ secrets.REDIS_URL }} \
-                      --env NODE_ENV=development \
-                      --restart always \
-                      8kmrun/backend-app:$GITHUB_SHA
-                  EOF
+version: "3.8"
+services:
+    backend:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "3000:3000"
+        environment:
+            - DATABASE_URL=${DATABASE_URL}
+            - REDIS_URL=${REDIS_URL}
+            - NODE_ENV=development
+        depends_on:
+            - postgres
+            - redis
+        restart: always
+    postgres:
+        image: postgres:15
+        environment:
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+        ports:
+            - "5432:5432"
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+    redis:
+        image: redis:7
+        ports:
+            - "6379:6379"
+volumes:
+    pgdata:
+        driver: local

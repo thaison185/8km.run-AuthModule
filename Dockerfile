@@ -1,9 +1,9 @@
-FROM node:20-alpine
-
-WORKDIR /usr/app
-COPY package*.json ./
-RUN npm ci --production
-RUN npm install @nestjs/cli
-COPY . .
-RUN rm -rf dist
-RUN npm run build
+FROM node:18-alpine
+   WORKDIR /app
+   COPY package*.json ./
+   RUN npm ci
+   COPY . .
+   RUN npm run build
+   ENV NODE_ENV=development
+   EXPOSE 3000
+   CMD ["node", "dist/src/main.js"]
