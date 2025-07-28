@@ -47,7 +47,9 @@ jobs:
               run: |
                   echo "$SSH_PRIVATE_KEY" > ~/ssh_key
                   chmod 600 ~/ssh_key
-                  ssh -i ~/ssh_key -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
+                  echo "Connecting to $VPS_USER@$VPS_HOST"
+                  ssh -i ~/ssh_key -o StrictHostKeyChecking=no -v $VPS_USER@$VPS_HOST << 'EOF'
+                    echo "Connected to VPS"
                     docker pull phanmhung/backend-app:$GITHUB_SHA
                     docker stop backend || true
                     docker rm backend || true
