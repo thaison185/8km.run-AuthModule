@@ -1,9 +1,7 @@
 name: Dev Pipeline
 on:
     push:
-        branches: [dev, main]
-    pull_request:
-        branches: [dev, main]
+        branches: [dev]
 
 jobs:
     ci:
@@ -160,7 +158,7 @@ jobs:
                     docker logout
                     
                     echo "🎉 Deployment completed successfully!"
-                  DEPLOY_SCRIPT
+                  EOF
 
                   # Cleanup SSH key
                   rm ~/ssh_key
