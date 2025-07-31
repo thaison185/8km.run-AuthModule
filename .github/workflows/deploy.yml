@@ -1,0 +1,47 @@
+name: Deploy to VPS
+on:
+    workflow_run:
+        workflows: ["Build and Push Docker Image"]
+        types:
+            - completed
+        branches: [dev]
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        environment: dev
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        steps:
+            - name: Deploy to VPS
+              env:
+                  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+                  VPS_HOST: ${{ secrets.VPS_HOST }}
+                  VPS_USER: ${{ secrets.VPS_USER }}
+                  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+                  REDIS_URL: ${{ secrets.REDIS_URL }}
+                  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+                  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+                  IMAGE_TAG: ${{ github.sha }}
+              run: |
+                  echo "$SSH_PRIVATE_KEY" > ~/ssh_key
+                  chmod 600 ~/ssh_key
+                  echo "Connecting to $VPS_USER@$VPS_HOST"
+                  echo "Image tag: $IMAGE_TAG"
+                  ssh -i ~/ssh_key -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
+                    echo "Connected to VPS"
+                    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                    docker pull phanmhung/backend-app:$IMAGE_TAG
+                    docker stop backend || true
+                    docker rm backend || true
+                    docker run -d --name backend \
+                      -p 3000:3000 \
+                      --env DATABASE_URL="$DATABASE_URL" \
+                      --env REDIS_URL="$REDIS_URL" \
+                      --env NODE_ENV=development \
+                      --restart always \
+                      phanmhung/backend-app:$IMAGE_TAG
+                    sleep 10
+                    docker exec backend npm run migrate:up
+                    docker image prune -f
+                  EOF
+                  rm ~/ssh_key
