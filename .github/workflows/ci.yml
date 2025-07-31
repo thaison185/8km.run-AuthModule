@@ -7,6 +7,8 @@ on:
 jobs:
     test-and-lint:
         runs-on: ubuntu-latest
+        outputs:
+            success: ${{ steps.final.outputs.success }}
         steps:
             - uses: actions/checkout@v3
             - name: Set up Node.js
@@ -22,3 +24,6 @@ jobs:
               run: npm run prettier
             - name: Build application
               run: npm run build
+            - name: Mark as successful
+              id: final
+              run: echo "success=true" >> $GITHUB_OUTPUT
