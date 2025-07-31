@@ -100,7 +100,7 @@ jobs:
                   chmod 600 ~/ssh_key
 
                   # Deploy to VPS
-                  ssh -i ~/ssh_key -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'DEPLOY_SCRIPT'
+                  ssh -i ~/ssh_key -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << EOF
                     set -e
                     echo "🔗 Connected to VPS successfully"
                     
