@@ -36,22 +36,21 @@ export class BaseRepository<T, TValue = ID> implements IBaseCRUD<T, TValue> {
 		limit: number,
 		offset: number,
 		options?: Omit<FindManyOptions<T>, "take" | "skip" | "order">,
-		order?: any,
+		order?: Record<string, "ASC" | "DESC">,
 		manager?: EntityManager
 	): Promise<T[]> {
 		return this.getManager(manager).find(this.repository.target, {
 			...(options || {}),
 			take: limit,
 			skip: offset,
-			order
+			order: order as FindManyOptions<T>["order"]
 		});
 	}
 
-	listAll(
-		where?: FindOptionsWhere<T> | FindOptionsWhere<T>[],
-		relations?: string[] | FindOptionsRelations<T>,
-		manager?: EntityManager
-	): Promise<T[]> {
-		return this.getManager(manager).find(this.repository.target, { where, relations });
+	listAll(where?: Partial<T>, relations?: string[] | FindOptionsRelations<T>, manager?: EntityManager): Promise<T[]> {
+		return this.getManager(manager).find(this.repository.target, {
+			where: where as FindOptionsWhere<T>,
+			relations
+		});
 	}
 }
