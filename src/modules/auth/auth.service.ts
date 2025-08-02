@@ -1,4 +1,183 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { ConfigType } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
+import { InjectRepository } from "@nestjs/typeorm";
+import * as argon2 from "argon2";
+import { randomUUID } from "crypto";
+import { JwtConfig } from "src/common/config";
+import { RefreshToken } from "src/core/database/sql/entities/refresh-token";
+import { User } from "src/core/database/sql/entities/user";
+import { Repository } from "typeorm";
+import { LoginRequestDto, LoginResponseDto, RefreshTokenDto, RegisterRequestDto } from "./dtos";
 
 @Injectable()
-export class AuthService {}
+export class AuthService {
+	constructor(
+		@InjectRepository(User)
+		private readonly userRepo: Repository<User>,
+		@InjectRepository(RefreshToken)
+		private readonly refreshTokenRepo: Repository<RefreshToken>,
+		private readonly jwtService: JwtService,
+		@Inject(JwtConfig.KEY)
+		private readonly jwtConfiguration: ConfigType<typeof JwtConfig>
+	) {}
+
+	async login(dto: LoginRequestDto): Promise<LoginResponseDto> {
+		const user = await this.userRepo.findOne({
+			where: [{ phone: dto.phone }],
+			select: ["id", "phone", "password", "firstname", "lastname"]
+		});
+
+		if (!user) throw new UnauthorizedException("Credentials incorrect");
+
+		const valid = await argon2.verify(user.password, dto.password);
+		if (!valid) throw new UnauthorizedException("Credentials incorrect");
+
+		return this.generateTokens(user);
+	}
+
+	// Dummy Logout for testing
+	async logout(user_id: string): Promise<void> {
+		// Delete all refresh tokens for this user
+		await this.refreshTokenRepo.delete({ user_id });
+	}
+
+	// Dummy register for testing
+	async register(registerDto: RegisterRequestDto): Promise<LoginResponseDto> {
+		// Check if user already exists
+		const existingUser = await this.userRepo.findOne({
+			where: [{ phone: registerDto.phone }]
+		});
+
+		if (existingUser) {
+			throw new UnauthorizedException("User with this phone number already exists");
+		}
+
+		// Hash password with Argon2
+		const hashedPassword = await argon2.hash(registerDto.password, { type: argon2.argon2id });
+
+		// Return User[] here
+		const userEntity = this.userRepo.create({ ...registerDto, password: hashedPassword });
+		const user = await this.userRepo.save(userEntity);
+
+		// But generateTokens need User param
+		return this.generateTokens(user);
+	}
+
+	private async generateTokens(user: User): Promise<LoginResponseDto> {
+		const refreshTokenId = randomUUID();
+		const { id, firstname, lastname, email, phone } = user;
+
+		const [accessToken, refreshToken] = await Promise.all([
+			this.signToken(id, this.jwtConfiguration.accessTokenTtl, this.jwtConfiguration.accessSecret, {
+				firstname,
+				lastname,
+				email,
+				phone
+			}),
+			this.signToken(user.id, this.jwtConfiguration.refreshTokenTtl, this.jwtConfiguration.refreshSecret, {
+				refreshTokenId
+			})
+		]);
+
+		// Store refresh token in database
+		const expiresAt = new Date();
+		expiresAt.setTime(expiresAt.getTime() + this.jwtConfiguration.refreshTokenTtl * 1000);
+
+		await this.refreshTokenRepo.save({
+			user_id: id,
+			refreshTokenId,
+			expiresAt
+		});
+
+		return {
+			accessToken,
+			refreshToken,
+			user: {
+				id: user.id,
+				firstname: user.firstname,
+				lastname: user.lastname,
+				phone: user.phone,
+				email: user.email
+			}
+		};
+	}
+
+	private async signToken<T>(user_id: string, expiresIn: number, secret: string, payload?: T): Promise<string> {
+		return this.jwtService.signAsync(
+			{
+				sub: user_id,
+				...payload
+			},
+			{
+				secret,
+				expiresIn
+			}
+		);
+	}
+
+	async refreshTokens(refreshTokenDto: RefreshTokenDto): Promise<LoginResponseDto> {
+		try {
+			const { sub, refreshTokenId } = await this.jwtService.verifyAsync<{
+				sub: string;
+				refreshTokenId: string;
+			}>(refreshTokenDto.refreshToken, {
+				secret: this.jwtConfiguration.refreshSecret
+			});
+
+			const user = await this.userRepo.findOne({
+				where: { id: sub }
+			});
+
+			if (!user) {
+				throw new NotFoundException("User not found");
+			}
+
+			const isValid = await this.findRefreshToken(user.id, refreshTokenId);
+
+			if (isValid) {
+				// Delete the used refresh token
+				await this.refreshTokenRepo.delete({
+					user_id: user.id,
+					refreshTokenId
+				});
+			} else {
+				throw new Error();
+			}
+
+			return await this.generateTokens(user);
+		} catch (err) {
+			if (err instanceof NotFoundException) {
+				// Clean up invalid refresh tokens for this user
+				await this.refreshTokenRepo.delete({
+					user_id: refreshTokenDto.refreshToken
+						? ((await this.jwtService.decode(refreshTokenDto.refreshToken)) as any)?.sub
+						: null
+				});
+			}
+
+			throw new UnauthorizedException("Invalid refresh token");
+		}
+	}
+
+	private async findRefreshToken(user_id: string, tokenId: string): Promise<boolean> {
+		const storedToken = await this.refreshTokenRepo.findOne({
+			where: {
+				user_id,
+				refreshTokenId: tokenId
+			}
+		});
+
+		if (!storedToken || storedToken.refreshTokenId !== tokenId) {
+			throw new Error();
+		}
+
+		// Check if token is expired
+		if (storedToken.expiresAt && storedToken.expiresAt < new Date()) {
+			await this.refreshTokenRepo.delete({ id: storedToken.id });
+			throw new Error();
+		}
+
+		return storedToken.refreshTokenId === tokenId;
+	}
+}
