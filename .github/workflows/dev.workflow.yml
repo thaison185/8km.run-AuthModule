@@ -104,6 +104,10 @@ jobs:
                     set -e
                     echo "🔗 Connected to VPS successfully"
                     
+                    # Login to Docker Hub
+                    echo "🔐 Logging in to Docker Hub..."
+                    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
                     # Pull new image
                     echo "📥 Pulling new image: phanmhung/backend-app:$IMAGE_TAG"
                     docker pull phanmhung/backend-app:$IMAGE_TAG
