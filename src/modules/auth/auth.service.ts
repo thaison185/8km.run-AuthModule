@@ -151,7 +151,7 @@ export class AuthService {
 				// Clean up invalid refresh tokens for this user
 				await this.refreshTokenRepo.delete({
 					user_id: refreshTokenDto.refreshToken
-						? ((await this.jwtService.decode(refreshTokenDto.refreshToken)) as any)?.sub
+						? ((await this.jwtService.decode(refreshTokenDto.refreshToken)) as { sub?: string })?.sub
 						: null
 				});
 			}
