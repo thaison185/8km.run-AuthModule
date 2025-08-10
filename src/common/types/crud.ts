@@ -14,9 +14,9 @@ export interface IBaseCRUD<T, TValue = ID> {
 		limit: number,
 		offset: number,
 		options: Omit<FindManyOptions<T>, "take" | "skip" | "order">,
-		order?: any,
+		order?: Record<string, "ASC" | "DESC">,
 		manager?: EntityManager
 	): Promise<T[]>;
 
-	listAll(where?: any, relations?: string[] | FindOptionsRelations<T>, manager?: EntityManager): Promise<T[]>;
+	listAll(where?: Partial<T>, relations?: string[] | FindOptionsRelations<T>, manager?: EntityManager): Promise<T[]>;
 }

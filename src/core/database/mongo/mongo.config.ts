@@ -25,20 +25,15 @@ export const getMongooseConfig = (): MongooseModuleOptions => {
 };
 
 export const createMongoConnection = async () => {
-	try {
-		const mongoConfig = getMongooseConfig();
-		await mongoose.connect(mongoConfig.uri!, {
-			dbName: mongoConfig.dbName,
-			maxPoolSize: mongoConfig.maxPoolSize,
-			serverSelectionTimeoutMS: mongoConfig.serverSelectionTimeoutMS,
-			socketTimeoutMS: mongoConfig.socketTimeoutMS
-		});
-		console.log("✅ MongoDB connected successfully!");
-		return mongoose.connection;
-	} catch (error) {
-		console.error("❌ MongoDB connection failed:", error);
-		throw error;
-	}
+	const mongoConfig = getMongooseConfig();
+	await mongoose.connect(mongoConfig.uri!, {
+		dbName: mongoConfig.dbName,
+		maxPoolSize: mongoConfig.maxPoolSize,
+		serverSelectionTimeoutMS: mongoConfig.serverSelectionTimeoutMS,
+		socketTimeoutMS: mongoConfig.socketTimeoutMS
+	});
+	// console.log("✅ MongoDB connected successfully!");
+	return mongoose.connection;
 };
 
 // Export default connection

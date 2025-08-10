@@ -23,7 +23,7 @@ export class UserRepository extends BaseRepository<User> {
 		relations?: string[] | FindOptionsRelations<User>,
 		manager?: EntityManager
 	): Promise<User[]> {
-		const where: FindOptionsWhere<User> = { [key]: value } as any;
+		const where: FindOptionsWhere<User> = { [key]: value } as FindOptionsWhere<User>;
 		return this.getManager(manager).find(this.repository.target, {
 			where,
 			relations
