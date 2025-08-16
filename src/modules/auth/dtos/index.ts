@@ -1,3 +1,5 @@
+export * from "./firebase-otp.dto";
+export * from "./firebase-verify-otp.dto";
 export * from "./login-request.dto";
 export * from "./login-response.dto";
 export * from "./refresh-token.dto";

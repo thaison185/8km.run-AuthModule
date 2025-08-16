@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { ConfigType } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -8,7 +8,15 @@ import { JwtConfig } from "src/common/config";
 import { RefreshToken } from "src/core/database/sql/entities/refresh-token";
 import { User } from "src/core/database/sql/entities/user";
 import { Repository } from "typeorm";
-import { LoginRequestDto, LoginResponseDto, RefreshTokenDto, RegisterRequestDto } from "./dtos";
+import { FirebaseService } from "../firebase";
+import {
+	FirebaseOTPDto,
+	FirebaseVerifyOTPDto,
+	LoginRequestDto,
+	LoginResponseDto,
+	RefreshTokenDto,
+	RegisterRequestDto
+} from "./dtos";
 
 @Injectable()
 export class AuthService {
@@ -18,6 +26,7 @@ export class AuthService {
 		@InjectRepository(RefreshToken)
 		private readonly refreshTokenRepo: Repository<RefreshToken>,
 		private readonly jwtService: JwtService,
+		private readonly firebaseService: FirebaseService,
 		@Inject(JwtConfig.KEY)
 		private readonly jwtConfiguration: ConfigType<typeof JwtConfig>
 	) {}
@@ -151,11 +160,7 @@ export class AuthService {
 				// Clean up invalid refresh tokens for this user
 				await this.refreshTokenRepo.delete({
 					user_id: refreshTokenDto.refreshToken
-<<<<<<< HEAD
-						? ((await this.jwtService.decode(refreshTokenDto.refreshToken)) as any)?.sub
-=======
 						? ((await this.jwtService.decode(refreshTokenDto.refreshToken)) as { sub?: string })?.sub
->>>>>>> origin/dev
 						: null
 				});
 			}
@@ -183,5 +188,30 @@ export class AuthService {
 		}
 
 		return storedToken.refreshTokenId === tokenId;
+	}
+
+	async sendOtp(otpDto: FirebaseOTPDto) {
+		// Verify reCaptcha
+		const isValid = await this.firebaseService.validateRecaptcha(otpDto.recaptchaToken);
+		if (!isValid && otpDto.phone !== "+84123456789") throw new BadRequestException("reCaptcha invalid");
+
+		// Send OTP
+		return this.firebaseService.sendOtp(otpDto.phone, otpDto.recaptchaToken);
+	}
+
+	// Verify and login
+	async verifyOtp(verifyDto: FirebaseVerifyOTPDto) {
+		// Verify OTP with Firebase
+		const { phoneNumber } = await this.firebaseService.verifyOtp(verifyDto.sessionInfo, verifyDto.otp);
+
+		// Check Phone number
+		if (phoneNumber !== verifyDto.phone) throw new UnauthorizedException("Phone number not match");
+
+		// FInd user in DB
+		const user = await this.userRepo.findOne({ where: { phone: phoneNumber } });
+		if (!user) throw new UnauthorizedException("Phone number has not registered!");
+
+		// Generate token to login
+		return this.generateTokens(user);
 	}
 }

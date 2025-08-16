@@ -5,6 +5,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { JwtConfig } from "src/common/config";
 import { RefreshToken } from "src/core/database/sql/entities/refresh-token";
 import { User } from "src/core/database/sql/entities/user";
+import { FirebaseModule } from "../firebase";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 
@@ -12,6 +13,7 @@ import { AuthService } from "./auth.service";
 	imports: [
 		TypeOrmModule.forFeature([User, RefreshToken]),
 		ConfigModule.forFeature(JwtConfig),
+		FirebaseModule,
 		JwtModule.registerAsync({
 			imports: [ConfigModule.forFeature(JwtConfig)],
 			inject: [JwtConfig.KEY],

@@ -15,8 +15,3 @@ const RegisterSchema = z.object({
 });
 
 export class RegisterRequestDto extends createZodDto(RegisterSchema) {}
-<<<<<<< HEAD
-
-
-=======
->>>>>>> origin/dev
