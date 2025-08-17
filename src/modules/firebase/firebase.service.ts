@@ -65,7 +65,7 @@ export class FirebaseService {
 					response: recaptchaToken
 				}
 			});
-			return response.data.success && (response.data.score ?? 1) >= 0.5;
+			return response.data.success && (response.data.score ?? 1) >= this.recaptchaScoreThreshold;
 		} catch {
 			return false;
 		}
