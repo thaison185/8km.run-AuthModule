@@ -11,6 +11,8 @@ export class FirebaseService {
 
 	private readonly recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
 
+	private readonly recaptchaScoreThreshold = process.env.RECAPTCHA_SCORE_THRESHOLD;
+
 	/**
 	 * Send OTP function, Firebase REST API send OTP in backend
 	 * No need if usingFirebase SDK in frontend to send OTP

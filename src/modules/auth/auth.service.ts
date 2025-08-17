@@ -193,7 +193,12 @@ export class AuthService {
 	async sendOtp(otpDto: FirebaseOTPDto) {
 		// Verify reCaptcha
 		const isValid = await this.firebaseService.validateRecaptcha(otpDto.recaptchaToken);
-		if (!isValid && otpDto.phone !== "+84123456789") throw new BadRequestException("reCaptcha invalid");
+		const bypassPhones = (process.env.OTP_BYPASS_PHONES || "")
+			.split(",")
+			.map((p) => p.trim())
+			.filter(Boolean);
+		const isBypass = bypassPhones.includes(otpDto.phone) && process.env.NODE_ENV !== "production";
+		if (!isValid && !isBypass) throw new BadRequestException("reCaptcha invalid");
 
 		// Send OTP
 		return this.firebaseService.sendOtp(otpDto.phone, otpDto.recaptchaToken);
@@ -207,7 +212,7 @@ export class AuthService {
 		// Check Phone number
 		if (phoneNumber !== verifyDto.phone) throw new UnauthorizedException("Phone number not match");
 
-		// FInd user in DB
+		// Find user in DB
 		const user = await this.userRepo.findOne({ where: { phone: phoneNumber } });
 		if (!user) throw new UnauthorizedException("Phone number has not registered!");
 
