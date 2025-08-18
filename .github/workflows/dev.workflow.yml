@@ -9,6 +9,13 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
+            - name: Write ENV_FILE to .env
+              run: |
+                  if [ -n "${{ vars.ENV_FILE }}" ]; then
+                    echo "${{ vars.ENV_FILE }}" > .env
+                  else
+                    echo "# no ENV_FILE provided" > .env
+                  fi
             - name: Set up Node.js
               uses: actions/setup-node@v4
               with:
@@ -39,6 +46,13 @@ jobs:
             image-tag: ${{ github.sha }}
         steps:
             - uses: actions/checkout@v4
+            - name: Write ENV_FILE to .env
+              run: |
+                  if [ -n "${{ vars.ENV_FILE }}" ]; then
+                    echo "${{ vars.ENV_FILE }}" > .env
+                  else
+                    echo "# no ENV_FILE provided" > .env
+                  fi
             - name: Set up Node.js
               uses: actions/setup-node@v4
               with:
