@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { ConfigType } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -8,7 +8,15 @@ import { JwtConfig } from "src/common/config";
 import { RefreshToken } from "src/core/database/sql/entities/refresh-token";
 import { User } from "src/core/database/sql/entities/user";
 import { Repository } from "typeorm";
-import { LoginRequestDto, LoginResponseDto, RefreshTokenDto, RegisterRequestDto } from "./dtos";
+import { FirebaseService } from "../firebase";
+import {
+	FirebaseOTPDto,
+	FirebaseVerifyOTPDto,
+	LoginRequestDto,
+	LoginResponseDto,
+	RefreshTokenDto,
+	RegisterRequestDto
+} from "./dtos";
 
 @Injectable()
 export class AuthService {
@@ -18,6 +26,7 @@ export class AuthService {
 		@InjectRepository(RefreshToken)
 		private readonly refreshTokenRepo: Repository<RefreshToken>,
 		private readonly jwtService: JwtService,
+		private readonly firebaseService: FirebaseService,
 		@Inject(JwtConfig.KEY)
 		private readonly jwtConfiguration: ConfigType<typeof JwtConfig>
 	) {}
@@ -179,5 +188,35 @@ export class AuthService {
 		}
 
 		return storedToken.refreshTokenId === tokenId;
+	}
+
+	async sendOtp(otpDto: FirebaseOTPDto) {
+		// Verify reCaptcha
+		const isValid = await this.firebaseService.validateRecaptcha(otpDto.recaptchaToken);
+		const bypassPhones = (process.env.OTP_BYPASS_PHONES || "")
+			.split(",")
+			.map((p) => p.trim())
+			.filter(Boolean);
+		const isBypass = bypassPhones.includes(otpDto.phone) && process.env.NODE_ENV !== "production";
+		if (!isValid && !isBypass) throw new BadRequestException("reCaptcha invalid");
+
+		// Send OTP
+		return this.firebaseService.sendOtp(otpDto.phone, otpDto.recaptchaToken);
+	}
+
+	// Verify and login
+	async verifyOtp(verifyDto: FirebaseVerifyOTPDto) {
+		// Verify OTP with Firebase
+		const { phoneNumber } = await this.firebaseService.verifyOtp(verifyDto.sessionInfo, verifyDto.otp);
+
+		// Check Phone number
+		if (phoneNumber !== verifyDto.phone) throw new UnauthorizedException("Phone number not match");
+
+		// Find user in DB
+		const user = await this.userRepo.findOne({ where: { phone: phoneNumber } });
+		if (!user) throw new UnauthorizedException("Phone number has not registered!");
+
+		// Generate token to login
+		return this.generateTokens(user);
 	}
 }

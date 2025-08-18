@@ -45,6 +45,7 @@
 		"axios": "^1.9.0",
 		"dotenv": "^17.2.0",
 		"fastify": "^5.3.3",
+		"firebase-admin": "^12.7.0",
 		"generate-api-key": "^1.0.2",
 		"ioredis": "^5.6.1",
 		"ip-location-api": "^3.0.2",
