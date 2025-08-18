@@ -12,7 +12,7 @@ jobs:
             - name: Write ENV_FILE to .env
               run: |
                   if [ -n "${{ vars.ENV_FILE }}" ]; then
-                    echo "${{ vars.ENV_FILE }}" > .env
+                    printf "%s\n" "${{ vars.ENV_FILE }}" > .env
                   else
                     echo "# no ENV_FILE provided" > .env
                   fi
@@ -49,7 +49,7 @@ jobs:
             - name: Write ENV_FILE to .env
               run: |
                   if [ -n "${{ vars.ENV_FILE }}" ]; then
-                    echo "${{ vars.ENV_FILE }}" > .env
+                    printf "%s\n" "${{ vars.ENV_FILE }}" > .env
                   else
                     echo "# no ENV_FILE provided" > .env
                   fi
