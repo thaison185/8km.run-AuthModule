@@ -121,25 +121,25 @@ jobs:
                     echo "🚀 Starting new container..."
                     docker run -d --name backend \
                       -p 3000:3000 \
-                      --env DATABASE_URL="$DATABASE_URL" \
-                      --env REDIS_URL="$REDIS_URL" \
+                      --env DATABASE_URL="${{ vars.DATABASE_URL }}" \
+                      --env REDIS_URL="${{ vars.REDIS_URL }}" \
                       --env NODE_ENV=development \
                       --env APP_PORT=3000 \
-                      --env TYPE="$TYPE" \
-                      --env PROJECT_ID="$PROJECT_ID" \
-                      --env PRIVATE_KEY_ID="$PRIVATE_KEY_ID" \
-                      --env PRIVATE_KEY="$secrets.PRIVATE_KEY" \
-                      --env CLIENT_EMAIL="$CLIENT_EMAIL" \
-                      --env CLIENT_ID="$CLIENT_ID" \
-                      --env AUTH_URI="$AUTH_URI" \
-                      --env TOKEN_URI="$TOKEN_URI" \
-                      --env AUTH_CERT_URL="$AUTH_CERT_URL" \
-                      --env CLIENT_CERT_URL="$CLIENT_CERT_URL" \
-                      --env UNIVERSAL_DOMAIN="$UNIVERSAL_DOMAIN" \
-                      --env FIREBASE_WEB_API_KEY="$secrets.FIREBASE_WEB_API_KEY" \
-                      --env RECAPTCHA_SECRET_KEY="$secrets.RECAPTCHA_SECRET_KEY" \
-                      --env RECAPTCHA_SCORE_THRESHOLD="$RECAPTCHA_SCORE_THRESHOLD" \
-                      --env OTP_BYPASS_PHONES="$OTP_BYPASS_PHONES" \
+                      --env TYPE="${{ vars.TYPE }}" \
+                      --env PROJECT_ID="${{ vars.PROJECT_ID }}" \
+                      --env PRIVATE_KEY_ID="${{ vars.PRIVATE_KEY_ID }}" \
+                      --env PRIVATE_KEY="${{ secrets.PRIVATE_KEY }}" \
+                      --env CLIENT_EMAIL="${{ vars.CLIENT_EMAIL }}" \
+                      --env CLIENT_ID="${{ vars.CLIENT_ID }}" \
+                      --env AUTH_URI="${{ vars.AUTH_URI }}" \
+                      --env TOKEN_URI="${{ vars.TOKEN_URI }}" \
+                      --env AUTH_CERT_URL="${{ vars.AUTH_CERT_URL }}" \
+                      --env CLIENT_CERT_URL="${{ vars.CLIENT_CERT_URL }}" \
+                      --env UNIVERSAL_DOMAIN="${{ vars.UNIVERSAL_DOMAIN }}" \
+                      --env FIREBASE_WEB_API_KEY="${{ secrets.FIREBASE_WEB_API_KEY }}" \
+                      --env RECAPTCHA_SECRET_KEY="${{ secrets.RECAPTCHA_SECRET_KEY }}" \
+                      --env RECAPTCHA_SCORE_THRESHOLD="${{ vars.RECAPTCHA_SCORE_THRESHOLD }}" \
+                      --env OTP_BYPASS_PHONES="${{ vars.OTP_BYPASS_PHONES }}" \
                       --restart always \
                       phanmhung/backend-app:$IMAGE_TAG
                     
