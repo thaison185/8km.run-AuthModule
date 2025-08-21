@@ -122,8 +122,8 @@ jobs:
 
                     echo "docker run --name backend \
                     -p 3000:3000 \
-                    --env DATABASE_URL=\"${{ vars.DATABASE_URL }}\" \
-                    --env REDIS_URL=\"${{ vars.REDIS_URL }}\" \
+                    --env DATABASE_URL=\"${{ secrets.DATABASE_URL }}\" \
+                    --env REDIS_URL=\"${{ secrets.REDIS_URL }}\" \
                     --env NODE_ENV=development \
                     --env APP_PORT=3000 \
                     --env TYPE=\"${{ vars.TYPE }}\" \
