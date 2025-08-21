@@ -156,7 +156,8 @@ jobs:
                     --env RECAPTCHA_SCORE_THRESHOLD=\"${{ vars.RECAPTCHA_SCORE_THRESHOLD }}\" \
                     --env OTP_BYPASS_PHONES=\"${{ vars.OTP_BYPASS_PHONES }}\" \
                     --restart always \
-                    
+                    phanmhung/backend-app:$IMAGE_TAG"
+
                     docker run --name backend \
                       -p 3000:3000 \
                       --env DATABASE_URL="${{ vars.DATABASE_URL }}" \
