@@ -8,6 +8,7 @@ import { User } from "src/core/database/sql/entities/user";
 import { FirebaseModule } from "../firebase";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
+import { GoogleAuthService } from "../google";
 
 @Module({
 	imports: [
@@ -21,10 +22,10 @@ import { AuthService } from "./auth.service";
 				secret: jwtConfig.accessSecret,
 				signOptions: { expiresIn: `${jwtConfig.accessTokenTtl}s` }
 			})
-		})
+		}),
 	],
-	providers: [AuthService],
+	providers: [AuthService,GoogleAuthService],
 	controllers: [AuthController],
-	exports: [AuthService]
+	exports: [AuthService, GoogleAuthService]
 })
 export class AuthModule {}

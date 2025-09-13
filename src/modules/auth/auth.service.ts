@@ -73,7 +73,7 @@ export class AuthService {
 		return this.generateTokens(user);
 	}
 
-	private async generateTokens(user: User): Promise<LoginResponseDto> {
+	async generateTokens(user: User): Promise<LoginResponseDto> {
 		const refreshTokenId = randomUUID();
 		const { id, firstname, lastname, email, phone } = user;
 
