@@ -10,7 +10,7 @@ import { FirebaseOTPDto, FirebaseVerifyOTPDto, LoginRequestDto, RegisterRequestD
 export class AuthController {
 	constructor(
 		private readonly authService: AuthService,
-		private googleAuthService: GoogleAuthService,
+		private readonly googleAuthService: GoogleAuthService,
     	private configService: ConfigService
 	) {}
 
