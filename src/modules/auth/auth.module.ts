@@ -6,9 +6,9 @@ import { JwtConfig } from "src/common/config";
 import { RefreshToken } from "src/core/database/sql/entities/refresh-token";
 import { User } from "src/core/database/sql/entities/user";
 import { FirebaseModule } from "../firebase";
+import { GoogleAuthService } from "../google";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
-import { GoogleAuthService } from "../google";
 
 @Module({
 	imports: [
@@ -22,9 +22,9 @@ import { GoogleAuthService } from "../google";
 				secret: jwtConfig.accessSecret,
 				signOptions: { expiresIn: `${jwtConfig.accessTokenTtl}s` }
 			})
-		}),
+		})
 	],
-	providers: [AuthService,GoogleAuthService],
+	providers: [AuthService, GoogleAuthService],
 	controllers: [AuthController],
 	exports: [AuthService, GoogleAuthService]
 })
