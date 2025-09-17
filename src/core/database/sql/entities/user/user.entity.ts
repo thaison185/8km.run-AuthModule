@@ -33,6 +33,9 @@ export class User {
 	@Column({ type: "boolean", nullable: true })
 	is_pic: boolean;
 
+	@Column({ name: 'google_id', nullable: true })
+	googleId: string;
+
 	@Column({ type: "varchar", nullable: true, unique: true }) // length
 	qrCode: string;
 
