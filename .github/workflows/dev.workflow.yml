@@ -134,11 +134,11 @@ jobs:
                     # Run new container
                     echo "🚀 Starting new container..."
                     docker run -d --name backend \
-                      -p 3000:3000 \
+                      -p 3000:4000 \
                       --env DATABASE_URL="${{ secrets.DATABASE_URL }}" \
                       --env REDIS_URL="${{ secrets.REDIS_URL }}" \
                       --env NODE_ENV=development \
-                      --env APP_PORT=3000 \
+                      --env APP_PORT=4000 \
                       --env TYPE="${{ vars.TYPE }}" \
                       --env PROJECT_ID="${{ vars.PROJECT_ID }}" \
                       --env PRIVATE_KEY_ID="${{ vars.PRIVATE_KEY_ID }}" \
