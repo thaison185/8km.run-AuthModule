@@ -154,6 +154,7 @@ jobs:
                       --env RECAPTCHA_SECRET_KEY="${{ secrets.RECAPTCHA_SECRET_KEY }}" \
                       --env RECAPTCHA_SCORE_THRESHOLD="${{ vars.RECAPTCHA_SCORE_THRESHOLD }}" \
                       --env OTP_BYPASS_PHONES="${{ vars.OTP_BYPASS_PHONES }}" \
+                      --env GOOGLE_CLIENT_ID="${{ vars.GOOGLE_CLIENT_ID }}" \
                       --restart always \
                       phanmhung/backend-app:$IMAGE_TAG
                     
