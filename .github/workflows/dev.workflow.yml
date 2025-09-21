@@ -134,6 +134,7 @@ jobs:
                     # Run new container
                     echo "🚀 Starting new container..."
                     docker run -d --name backend \
+                      --network server \
                       -p 4000:3000 \
                       --env DATABASE_URL="${{ secrets.DATABASE_URL }}" \
                       --env REDIS_URL="${{ secrets.REDIS_URL }}" \
