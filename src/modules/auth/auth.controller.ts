@@ -34,9 +34,9 @@ export class AuthController {
 		return this.authService.verifyOtp(dto);
 	}
 
-	@Post("google/token")
+	@Post("google")
 	async googleTokenLogin(@Body() dto: GoogleTokenDto) {
-		const result = await this.googleAuthService.handleGoogleTokenLogin(dto.idToken);
+		const result = await this.googleAuthService.loginWithGoogle(dto.authCode);
 		return {
 			success: true,
 			...result

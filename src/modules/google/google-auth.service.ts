@@ -30,13 +30,51 @@ export class GoogleAuthService {
 		private authService: AuthService,
 		private configService: ConfigService
 	) {
-		this.googleClient = new OAuth2Client(this.configService.get("GOOGLE_CLIENT_ID"));
+		this.googleClient = new OAuth2Client(
+			this.configService.get("GOOGLE_CLIENT_ID"),
+			this.configService.get("GOOGLE_CLIENT_SECRET"),
+			this.configService.get("GOOGLE_REDIRECT_URI")
+		);
+	}
+
+	/**
+	 * Main handler login with google method
+	 */
+
+	async loginWithGoogle(authCode: string) {
+		const idToken = await this.exchangeAuthCode(authCode);
+
+		return this.handleGoogleTokenLogin(idToken);
+	}
+
+	/**
+	 * Exchange auth code for id_token
+	 */
+	private async exchangeAuthCode(authCode: string) {
+		try {
+			const { tokens } = await this.googleClient.getToken(authCode);
+
+			if (!tokens || !tokens.id_token) {
+				throw new UnauthorizedException("Token exchange failed!");
+			}
+
+			return tokens.id_token;
+		} catch (error) {
+			if (error instanceof UnauthorizedException) {
+				throw error;
+			}
+
+			throw new UnauthorizedException({
+				message: "Unexpected error while exchange code!",
+				error
+			});
+		}
 	}
 
 	/**
 	 * Verify Google ID Token and handle login logic
 	 */
-	async handleGoogleTokenLogin(idToken: string) {
+	private async handleGoogleTokenLogin(idToken: string) {
 		let payload;
 		try {
 			// Verify ID token with Google
