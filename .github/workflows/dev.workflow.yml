@@ -134,7 +134,7 @@ jobs:
                     # Run new container
                     echo "🚀 Starting new container..."
                     docker run -d --name backend \
-                      -p 3000:3000 \
+                      -p 4000:3000 \
                       --env DATABASE_URL="${{ secrets.DATABASE_URL }}" \
                       --env REDIS_URL="${{ secrets.REDIS_URL }}" \
                       --env NODE_ENV=development \
@@ -154,6 +154,7 @@ jobs:
                       --env RECAPTCHA_SECRET_KEY="${{ secrets.RECAPTCHA_SECRET_KEY }}" \
                       --env RECAPTCHA_SCORE_THRESHOLD="${{ vars.RECAPTCHA_SCORE_THRESHOLD }}" \
                       --env OTP_BYPASS_PHONES="${{ vars.OTP_BYPASS_PHONES }}" \
+                      --env GOOGLE_CLIENT_ID="${{ vars.GOOGLE_CLIENT_ID }}" \
                       --restart always \
                       phanmhung/backend-app:$IMAGE_TAG
                     
