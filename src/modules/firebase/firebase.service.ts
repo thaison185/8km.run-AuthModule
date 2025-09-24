@@ -1,5 +1,5 @@
 // src/firebase/firebase.service.ts
-import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { Inject, Injectable, InternalServerErrorException, UnauthorizedException } from "@nestjs/common";
 import axios from "axios";
 import { app } from "firebase-admin";
 
@@ -18,12 +18,19 @@ export class FirebaseService {
 	 * No need if usingFirebase SDK in frontend to send OTP
 	 */
 	async sendOtp(phone: string, recaptchaToken: string): Promise<{ sessionInfo: string }> {
-		const url = `https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=${this.firebaseApiKey}`;
-		const res = await axios.post(url, {
-			phoneNumber: phone,
-			recaptchaToken
-		});
-		return { sessionInfo: res.data.sessionInfo };
+		try {
+			const url = `https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=${this.firebaseApiKey}`;
+			const res = await axios.post(url, {
+				phoneNumber: phone,
+				recaptchaToken
+			});
+			return { sessionInfo: res.data.sessionInfo };
+		} catch (error) {
+			throw new InternalServerErrorException({
+				message: "Unexpected error while sending OTP!",
+				error
+			});
+		}
 	}
 
 	/**
@@ -31,12 +38,19 @@ export class FirebaseService {
 	 * Call Firebase REST API to verify OTP and get idToken
 	 */
 	async verifyOtp(sessionInfo: string, otp: string): Promise<{ phoneNumber: string; idToken: string }> {
-		const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=${this.firebaseApiKey}`;
-		const res = await axios.post(url, {
-			code: otp,
-			sessionInfo
-		});
-		return { phoneNumber: res.data.phoneNumber, idToken: res.data.idToken };
+		try {
+			const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=${this.firebaseApiKey}`;
+			const res = await axios.post(url, {
+				code: otp,
+				sessionInfo
+			});
+			return { phoneNumber: res.data.phoneNumber, idToken: res.data.idToken };
+		} catch (error) {
+			throw new InternalServerErrorException({
+				message: "Unexpected error while verifying OTP!",
+				error
+			});
+		}
 	}
 
 	/**
