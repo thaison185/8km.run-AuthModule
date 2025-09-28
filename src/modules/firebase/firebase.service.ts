@@ -9,9 +9,9 @@ export class FirebaseService {
 
 	private readonly firebaseApiKey = process.env.FIREBASE_WEB_API_KEY;
 
-	private readonly recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
+	// private readonly recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
 
-	private readonly recaptchaScoreThreshold = process.env.RECAPTCHA_SCORE_THRESHOLD;
+	// private readonly recaptchaScoreThreshold = process.env.RECAPTCHA_SCORE_THRESHOLD;
 
 	/**
 	 * Send OTP function, Firebase REST API send OTP in backend
@@ -71,17 +71,17 @@ export class FirebaseService {
 	/**
 	 * Verify reCaptcha token with Google
 	 */
-	async validateRecaptcha(recaptchaToken: string): Promise<boolean> {
-		try {
-			const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify`, null, {
-				params: {
-					secret: this.recaptchaSecret,
-					response: recaptchaToken
-				}
-			});
-			return response.data.success && (response.data.score ?? 1) >= this.recaptchaScoreThreshold;
-		} catch {
-			return false;
-		}
-	}
+	// async validateRecaptcha(recaptchaToken: string): Promise<boolean> {
+	// 	try {
+	// 		const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify`, null, {
+	// 			params: {
+	// 				secret: this.recaptchaSecret,
+	// 				response: recaptchaToken
+	// 			}
+	// 		});
+	// 		return response.data.success && (response.data.score ?? 1) >= this.recaptchaScoreThreshold;
+	// 	} catch {
+	// 		return false;
+	// 	}
+	// }
 }
