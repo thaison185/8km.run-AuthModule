@@ -34,12 +34,12 @@ export class AuthController {
 		return this.authService.register(dto);
 	}
 
-	@Post("send-otp")
+	@Post("phone/send-otp")
 	sendOtp(@Body() dto: FirebaseOTPDto) {
 		return this.authService.sendOtp(dto);
 	}
 
-	@Post("verify-otp")
+	@Post("phone/verify-otp")
 	verifyOtp(@Body() dto: FirebaseVerifyOTPDto) {
 		return this.authService.verifyOtp(dto);
 	}
