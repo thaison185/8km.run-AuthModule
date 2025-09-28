@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as crypto from "crypto";
+import axios from "axios";
 import { EmailOtp } from "src/core/database/sql/entities/email-otp";
 import { User } from "src/core/database/sql/entities/user";
 import { LessThan, Repository } from "typeorm";
@@ -13,6 +14,10 @@ export class EmailOtpService {
 	private readonly OTP_EXPIRY_MINUTES = 5;
 
 	private readonly MAX_ATTEMPTS = 5;
+
+    private readonly recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
+
+	private readonly recaptchaScoreThreshold = process.env.RECAPTCHA_SCORE_THRESHOLD;
 
 	constructor(
 		@InjectRepository(EmailOtp)
@@ -28,6 +33,11 @@ export class EmailOtpService {
 	 */
 	async sendOtp(email: string): Promise<{ message: string }> {
 		try {
+            // Check recaptcha
+                if (!this.validateRecaptcha) {
+                    throw new BadRequestException("Recaptcha Validation failed");
+                }
+
 			// Check rate limit
 			const recentOtp = await this.emailOtpRepository.findOne({
 				where: {
@@ -168,5 +178,22 @@ export class EmailOtpService {
 		await this.emailOtpRepository.delete({
 			expires_at: LessThan(new Date())
 		});
+	}
+
+    /**
+	 * Verify reCaptcha token with Google
+	 */
+	private async validateRecaptcha(recaptchaToken: string): Promise<boolean> {
+		try {
+			const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify`, null, {
+				params: {
+					secret: this.recaptchaSecret,
+					response: recaptchaToken
+				}
+			});
+			return response.data.success && (response.data.score ?? 1) >= this.recaptchaScoreThreshold;
+		} catch {
+			return false;
+		}
 	}
 }
