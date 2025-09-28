@@ -192,13 +192,12 @@ export class AuthService {
 
 	async sendOtp(otpDto: FirebaseOTPDto) {
 		// Verify reCaptcha
-		const isValid = await this.firebaseService.validateRecaptcha(otpDto.recaptchaToken);
 		const bypassPhones = (process.env.OTP_BYPASS_PHONES || "")
 			.split(",")
 			.map((p) => p.trim())
 			.filter(Boolean);
 		const isBypass = bypassPhones.includes(otpDto.phone) && process.env.NODE_ENV !== "production";
-		if (!isValid && !isBypass) throw new BadRequestException("reCaptcha invalid");
+		if (!isBypass) throw new BadRequestException("reCaptcha invalid");
 
 		// Send OTP
 		return this.firebaseService.sendOtp(otpDto.phone, otpDto.recaptchaToken);
