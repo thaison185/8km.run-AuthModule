@@ -158,6 +158,11 @@ jobs:
                       --env GOOGLE_CLIENT_ID="${{ vars.GOOGLE_CLIENT_ID }}" \
                       --env GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
                       --env GOOGLE_REDIRECT_URI="${{ vars.GOOGLE_REDIRECT_URI }}" \
+                      --env SMTP_HOST = "${{ vars.SMTP_HOST }}" \
+                      --env SMTP_PORT = "${{ vars.SMTP_PORT }}" \
+                      --env SMTP_USER = "${{ vars.SMTP_USER }}" \
+                      --env SMTP_FROM = "${{ vars.SMTP_FROM }}" \
+                      --env SMTP_PASS = "${{ secrets.SMTP_PASS }}" \
                       --restart always \
                       phanmhung/backend-app:$IMAGE_TAG
                     
