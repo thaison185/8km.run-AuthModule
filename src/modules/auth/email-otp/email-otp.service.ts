@@ -35,7 +35,7 @@ export class EmailOtpService {
 		try {
             // Check recaptcha
                 if (!this.validateRecaptcha) {
-                    throw new BadRequestException("Recaptcha Validation failed");
+                    throw new BadRequestException("RECAPTCHA_VALIDATION_FAILED");
                 }
 
 			// Check rate limit
@@ -51,7 +51,7 @@ export class EmailOtpService {
 				const timeSinceCreated = Date.now() - recentOtp.created_at.getTime();
 				if (timeSinceCreated < 60 * 1000) {
 					// 1 min
-					throw new BadRequestException("Please wait 1 minute before requesting new OTP");
+					throw new BadRequestException("OTP_REQUEST_TOO_FREQUENT");
 				}
 			}
 
@@ -80,13 +80,13 @@ export class EmailOtpService {
 			await this.emailService.sendOtpEmail(email, otp);
 
 			return {
-				message: "OTP sent successfully to your email"
+				message: "OTP_SENT_SUCCESSFULLY"
 			};
 		} catch (error) {
 			if (error instanceof BadRequestException) {
 				throw error;
 			}
-			throw new BadRequestException("Failed to send OTP");
+			throw new BadRequestException("SEND_OTP_FAILED", error);
 		}
 	}
 
@@ -105,19 +105,19 @@ export class EmailOtpService {
 			});
 
 			if (!emailOtpEntity) {
-				throw new UnauthorizedException("Invalid or expired OTP");
+				throw new UnauthorizedException("OTP_NOT_FOUND");
 			}
 
 			// Check expire
 			if (emailOtpEntity.expires_at < new Date()) {
 				await this.emailOtpRepository.update(emailOtpEntity.id, { used: true });
-				throw new UnauthorizedException("OTP has expired");
+				throw new UnauthorizedException("OTP_EXPIRED");
 			}
 
 			// Check attempt count
 			if (emailOtpEntity.attempt_count >= this.MAX_ATTEMPTS) {
 				await this.emailOtpRepository.update(emailOtpEntity.id, { used: true });
-				throw new UnauthorizedException("Too many invalid attempts");
+				throw new UnauthorizedException("MAX_OTP_ATTEMPTS_EXCEEDED");
 			}
 
 			// Check match OTP
@@ -127,7 +127,7 @@ export class EmailOtpService {
 				await this.emailOtpRepository.update(emailOtpEntity.id, {
 					attempt_count: emailOtpEntity.attempt_count + 1
 				});
-				throw new UnauthorizedException("Invalid OTP");
+				throw new UnauthorizedException("OTP_INVALID");
 			}
 
 			// OTP match
@@ -138,7 +138,7 @@ export class EmailOtpService {
 
 			if (!user) {
 				throw new NotFoundException({
-					message: "User not found, please register!",
+					message: "USER_NOT_FOUND",
 					email
 				});
 			}
@@ -150,7 +150,7 @@ export class EmailOtpService {
 				throw error;
 			}
 			throw new UnauthorizedException({
-				message: "OTP verification failed",
+				message: "OTP_VERIFICATION_FAILED",
 				error
 			});
 		}

@@ -55,7 +55,7 @@ export class GoogleAuthService {
 			const { tokens } = await this.googleClient.getToken(authCode);
 
 			if (!tokens || !tokens.id_token) {
-				throw new UnauthorizedException("Token exchange failed!");
+				throw new UnauthorizedException("ID_TOKEN_NOT_FOUND");
 			}
 
 			return tokens.id_token;
@@ -65,7 +65,7 @@ export class GoogleAuthService {
 			}
 
 			throw new UnauthorizedException({
-				message: "Unexpected error while exchange code!",
+				message: "AUTH_CODE_EXCHANGE_FAILED",
 				error
 			});
 		}
@@ -86,11 +86,11 @@ export class GoogleAuthService {
 			payload = ticket.getPayload();
 
 			if (!payload) {
-				throw new UnauthorizedException("Invalid Google token");
+				throw new UnauthorizedException("INVALID_TOKEN_PAYLOAD");
 			}
 
 			if (!payload.email_verified) {
-				throw new UnauthorizedException("Unverified Google email!");
+				throw new UnauthorizedException("EMAIL_NOT_VERIFIED");
 			}
 		} catch (error) {
 			if (error instanceof UnauthorizedException) {
@@ -98,7 +98,7 @@ export class GoogleAuthService {
 			}
 
 			throw new UnauthorizedException({
-				message: "Google token verification failed!",
+				message: "TOKEN_VERIFICATION_FAILED",
 				error
 			});
 		}
@@ -122,7 +122,7 @@ export class GoogleAuthService {
 			if (user) {
 				// User exist
 				if (user.googleId && user.googleId !== googleUser.googleId) {
-					throw new UnauthorizedException("Email was linked to other account!");
+					throw new UnauthorizedException("GOOGLE_ID_MISMATCH");
 				}
 
 				// Update google_id if not exist
@@ -133,7 +133,7 @@ export class GoogleAuthService {
 			} else {
 				// Return to frontend to move to registration UI
 				throw new NotFoundException({
-					message: "User not found, please register!",
+					message: "USER_NOT_FOUND",
 					googleUser: {
 						googleId: googleUser.googleId,
 						email: googleUser.email,
@@ -150,7 +150,7 @@ export class GoogleAuthService {
 			}
 
 			throw new InternalServerErrorException({
-				message: "Unexpected error when handling google account!",
+				message: "GOOGLE_LOGIN_FAILED",
 				error
 			});
 		}
