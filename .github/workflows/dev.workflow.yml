@@ -117,7 +117,7 @@ jobs:
                   ssh -i ~/ssh_key -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << EOF
                     set -e
                     echo "🔗 Connected to VPS successfully"
-                    
+
                     # Login to Docker Hub
                     echo "🔐 Logging in to Docker Hub..."
                     echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
@@ -125,12 +125,12 @@ jobs:
                     # Pull new image
                     echo "📥 Pulling new image: phanmhung/backend-app:$IMAGE_TAG"
                     docker pull phanmhung/backend-app:$IMAGE_TAG
-                    
+
                     # Stop and remove old container
                     echo "🛑 Stopping existing container..."
                     docker stop backend || echo "No existing container to stop"
                     docker rm backend || echo "No existing container to remove"
-                    
+
                     # Run new container
                     echo "🚀 Starting new container..."
                     docker run -d --name backend \
@@ -158,25 +158,30 @@ jobs:
                       --env GOOGLE_CLIENT_ID="${{ vars.GOOGLE_CLIENT_ID }}" \
                       --env GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
                       --env GOOGLE_REDIRECT_URI="${{ vars.GOOGLE_REDIRECT_URI }}" \
+                      --env SMTP_HOST="${{ vars.SMTP_HOST }}" \
+                      --env SMTP_PORT="${{ vars.SMTP_PORT }}" \
+                      --env SMTP_FROM="${{ vars.SMTP_FROM }}" \
+                      --env SMTP_USER="${{ vars.SMTP_USER }}" \
+                      --env SMTP_PASS="${{ secrets.SMTP_PASS }}" \
                       --restart always \
                       phanmhung/backend-app:$IMAGE_TAG
-                    
+
                     # Wait for container to start
                     echo "⏳ Waiting for container to start..."
                     sleep 15
-                    
+
                     # Check if container is running
                     if docker ps | grep -q "backend"; then
                       echo "✅ Container is running"
-                      
+
                       # Run migrations
                       echo "🔄 Running database migrations..."
                       docker exec backend npm run migrate:up || echo "⚠️  Migration failed or no migrations to run"
-                      
+
                       # Show container status
                       echo "📊 Container status:"
                       docker ps --filter name=backend --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-                      
+
                       # Show container logs (last 10 lines)
                       echo "📋 Recent container logs:"
                       docker logs backend --tail 10
@@ -185,15 +190,15 @@ jobs:
                       docker logs backend --tail 20
                       exit 1
                     fi
-                    
+
                     # Cleanup old images (keep last 3)
                     echo "🧹 Cleaning up old images..."
                     docker images phanmhung/backend-app --format "{{.Tag}}" | head -n -3 | xargs -r docker rmi phanmhung/backend-app: || true
                     docker image prune -f || true
-                    
+
                     # Logout from Docker Hub
                     docker logout
-                    
+
                     echo "🎉 Deployment completed successfully!"
                   EOF
 
