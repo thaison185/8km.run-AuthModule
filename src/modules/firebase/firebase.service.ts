@@ -20,15 +20,17 @@ export class FirebaseService {
 	async sendOtp(phone: string, recaptchaToken: string): Promise<{ sessionInfo: string }> {
 		try {
 			const url = `https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=${this.firebaseApiKey}`;
-			const res = await axios.post(url, {
-                phoneNumber: phone,
-                recaptchaToken
-            }).catch((error) => {
-                throw new InternalServerErrorException({
-                    message: "SEND_OTP_FAILED",
-                    error: error.response?.data || error.message
-                });
-            });
+			const res = await axios
+				.post(url, {
+					phoneNumber: phone,
+					recaptchaToken
+				})
+				.catch((error) => {
+					throw new InternalServerErrorException({
+						message: "SEND_OTP_FAILED",
+						error: error.response?.data || error.message
+					});
+				});
 			return { sessionInfo: res.data.sessionInfo };
 		} catch (error) {
 			if (error instanceof InternalServerErrorException) {

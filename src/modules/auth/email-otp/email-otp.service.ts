@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import * as crypto from "crypto";
 import axios from "axios";
+import * as crypto from "crypto";
 import { EmailOtp } from "src/core/database/sql/entities/email-otp";
 import { User } from "src/core/database/sql/entities/user";
 import { LessThan, Repository } from "typeorm";
@@ -9,13 +9,17 @@ import { AuthService } from "../auth.service";
 import { LoginResponseDto } from "../dtos";
 import { EmailService } from "./email.service";
 
+interface TestEmailMap {
+	[key: string]: string;
+}
+
 @Injectable()
 export class EmailOtpService {
 	private readonly OTP_EXPIRY_MINUTES = 5;
 
 	private readonly MAX_ATTEMPTS = 5;
 
-    private readonly recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
+	private readonly recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
 
 	private readonly recaptchaScoreThreshold = process.env.RECAPTCHA_SCORE_THRESHOLD;
 
@@ -31,12 +35,13 @@ export class EmailOtpService {
 	/**
 	 * Tạo và gửi OTP qua email
 	 */
-	async sendOtp(email: string): Promise<{ message: string }> {
+	async sendOtp(email: string, recaptchaToken: string): Promise<{ message: string }> {
 		try {
-            // Check recaptcha
-                if (!this.validateRecaptcha) {
-                    throw new BadRequestException("RECAPTCHA_VALIDATION_FAILED");
-                }
+			// Check recaptcha
+			const isValid = await this.validateRecaptcha(recaptchaToken);
+			if (!isValid) {
+				throw new BadRequestException("RECAPTCHA_VALIDATION_FAILED");
+			}
 
 			// Check rate limit
 			const recentOtp = await this.emailOtpRepository.findOne({
@@ -143,7 +148,6 @@ export class EmailOtpService {
 				});
 			}
 
-			// Tạo và trả về tokens
 			return await this.authService.generateTokens(user);
 		} catch (error) {
 			if (error instanceof UnauthorizedException || error instanceof NotFoundException) {
@@ -180,20 +184,50 @@ export class EmailOtpService {
 		});
 	}
 
-    /**
+	/**
 	 * Verify reCaptcha token with Google
 	 */
 	private async validateRecaptcha(recaptchaToken: string): Promise<boolean> {
 		try {
-			const response = await axios.post(`https://www.google.com/recaptcha/api/siteverify`, null, {
-				params: {
-					secret: this.recaptchaSecret,
-					response: recaptchaToken
-				}
+			const response = await axios.postForm("https://www.google.com/recaptcha/api/siteverify", {
+				secret: this.recaptchaSecret,
+				response: recaptchaToken
 			});
 			return response.data.success && (response.data.score ?? 1) >= this.recaptchaScoreThreshold;
 		} catch {
 			return false;
 		}
+	}
+
+	private testEmails: TestEmailMap = {
+		"registered@test.mail": "363636",
+		"unregistered@test.mail": "036036"
+	};
+
+	async sendOtpTest(email: string, recaptchaToken: string): Promise<{ message: string }> {
+		if (email in this.testEmails) {
+			return {
+				message: "OTP_SENT_SUCCESSFULLY"
+			};
+		}
+		return this.sendOtp(email, recaptchaToken);
+	}
+
+	async verifyOtpTest(email: string, otp: string): Promise<LoginResponseDto> {
+		if (email in this.testEmails) {
+			if (this.testEmails[email] !== otp) {
+				throw new UnauthorizedException("OTP_INVALID");
+			}
+
+			const user = await this.userRepository.findOne({ where: { email } });
+			if (!user) {
+				throw new NotFoundException({
+					message: "USER_NOT_FOUND",
+					email
+				});
+			}
+			return this.authService.generateTokens(user);
+		}
+		return this.verifyOtp(email, otp);
 	}
 }
