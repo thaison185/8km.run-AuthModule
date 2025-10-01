@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import * as crypto from "crypto";
 import axios from "axios";
+import * as crypto from "crypto";
 import { EmailOtp } from "src/core/database/sql/entities/email-otp";
 import { User } from "src/core/database/sql/entities/user";
 import { LessThan, Repository } from "typeorm";
@@ -15,7 +15,7 @@ export class EmailOtpService {
 
 	private readonly MAX_ATTEMPTS = 5;
 
-    private readonly recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
+	private readonly recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
 
 	private readonly recaptchaScoreThreshold = process.env.RECAPTCHA_SCORE_THRESHOLD;
 
@@ -33,10 +33,10 @@ export class EmailOtpService {
 	 */
 	async sendOtp(email: string): Promise<{ message: string }> {
 		try {
-            // Check recaptcha
-                if (!this.validateRecaptcha) {
-                    throw new BadRequestException("RECAPTCHA_VALIDATION_FAILED");
-                }
+			// Check recaptcha
+			if (!this.validateRecaptcha) {
+				throw new BadRequestException("RECAPTCHA_VALIDATION_FAILED");
+			}
 
 			// Check rate limit
 			const recentOtp = await this.emailOtpRepository.findOne({
@@ -180,7 +180,7 @@ export class EmailOtpService {
 		});
 	}
 
-    /**
+	/**
 	 * Verify reCaptcha token with Google
 	 */
 	private async validateRecaptcha(recaptchaToken: string): Promise<boolean> {
