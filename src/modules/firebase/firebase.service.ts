@@ -21,13 +21,21 @@ export class FirebaseService {
 		try {
 			const url = `https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=${this.firebaseApiKey}`;
 			const res = await axios.post(url, {
-				phoneNumber: phone,
-				recaptchaToken
-			});
+                phoneNumber: phone,
+                recaptchaToken
+            }).catch((error) => {
+                throw new InternalServerErrorException({
+                    message: "SEND_OTP_FAILED",
+                    error: error.response?.data || error.message
+                });
+            });
 			return { sessionInfo: res.data.sessionInfo };
 		} catch (error) {
+			if (error instanceof InternalServerErrorException) {
+				throw error;
+			}
 			throw new InternalServerErrorException({
-				message: "Unexpected error while sending OTP!",
+				message: "SEND_OTP_FAILED",
 				error
 			});
 		}
@@ -47,7 +55,7 @@ export class FirebaseService {
 			return { phoneNumber: res.data.phoneNumber, idToken: res.data.idToken };
 		} catch (error) {
 			throw new InternalServerErrorException({
-				message: "Unexpected error while verifying OTP!",
+				message: "VERIFY_OTP_FAILED",
 				error
 			});
 		}
@@ -60,11 +68,11 @@ export class FirebaseService {
 		try {
 			const decodedToken = await this.firebaseApp.auth().verifyIdToken(idToken);
 			if (!decodedToken.phone_number) {
-				throw new UnauthorizedException("Phone number not found");
+				throw new UnauthorizedException("FIREBASE_ID_TOKEN_INVALID");
 			}
 			return decodedToken.phone_number;
 		} catch (error) {
-			throw new UnauthorizedException("Firebase ID verification failed");
+			throw new UnauthorizedException("FIREBASE_ID_TOKEN_INVALID", error);
 		}
 	}
 

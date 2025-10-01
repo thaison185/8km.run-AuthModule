@@ -1,3 +1,5 @@
+export * from "./email-otp-send.dto";
+export * from "./email-otp-verify.dto";
 export * from "./firebase-otp.dto";
 export * from "./firebase-verify-otp.dto";
 export * from "./google-token.dto";

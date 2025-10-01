@@ -154,7 +154,6 @@ jobs:
                       --env FIREBASE_WEB_API_KEY="${{ secrets.FIREBASE_WEB_API_KEY }}" \
                       --env RECAPTCHA_SECRET_KEY="${{ secrets.RECAPTCHA_SECRET_KEY }}" \
                       --env RECAPTCHA_SCORE_THRESHOLD="${{ vars.RECAPTCHA_SCORE_THRESHOLD }}" \
-                      --env OTP_BYPASS_PHONES="${{ vars.OTP_BYPASS_PHONES }}" \
                       --env GOOGLE_CLIENT_ID="${{ vars.GOOGLE_CLIENT_ID }}" \
                       --env GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
                       --env GOOGLE_REDIRECT_URI="${{ vars.GOOGLE_REDIRECT_URI }}" \

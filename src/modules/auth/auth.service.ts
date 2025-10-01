@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { ConfigType } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -37,10 +37,10 @@ export class AuthService {
 			select: ["id", "phone", "password", "firstname", "lastname"]
 		});
 
-		if (!user) throw new UnauthorizedException("Credentials incorrect");
+		if (!user) throw new UnauthorizedException("CREDENTIALS_INCORRECT");
 
 		const valid = await argon2.verify(user.password, dto.password);
-		if (!valid) throw new UnauthorizedException("Credentials incorrect");
+		if (!valid) throw new UnauthorizedException("CREDENTIALS_INCORRECT");
 
 		return this.generateTokens(user);
 	}
@@ -59,7 +59,7 @@ export class AuthService {
 		});
 
 		if (existingUser) {
-			throw new UnauthorizedException("User with this phone number already exists");
+			throw new UnauthorizedException("USER_ALREADY_EXISTS");
 		}
 
 		// Hash password with Argon2
@@ -139,7 +139,7 @@ export class AuthService {
 			});
 
 			if (!user) {
-				throw new NotFoundException("User not found");
+				throw new NotFoundException("USER_NOT_FOUND");
 			}
 
 			const isValid = await this.findRefreshToken(user.id, refreshTokenId);
@@ -165,7 +165,7 @@ export class AuthService {
 				});
 			}
 
-			throw new UnauthorizedException("Invalid refresh token");
+			throw new UnauthorizedException("REFRESH_TOKEN_INVALID");
 		}
 	}
 
@@ -191,15 +191,7 @@ export class AuthService {
 	}
 
 	async sendOtp(otpDto: FirebaseOTPDto) {
-		// Verify reCaptcha
-		const bypassPhones = (process.env.OTP_BYPASS_PHONES || "")
-			.split(",")
-			.map((p) => p.trim())
-			.filter(Boolean);
-		const isBypass = bypassPhones.includes(otpDto.phone) && process.env.NODE_ENV !== "production";
-		if (!isBypass) throw new BadRequestException("reCaptcha invalid");
-
-		// Send OTP
+		// Send OTP with Firebase
 		return this.firebaseService.sendOtp(otpDto.phone, otpDto.recaptchaToken);
 	}
 
@@ -209,11 +201,11 @@ export class AuthService {
 		const { phoneNumber } = await this.firebaseService.verifyOtp(verifyDto.sessionInfo, verifyDto.otp);
 
 		// Check Phone number
-		if (phoneNumber !== verifyDto.phone) throw new UnauthorizedException("Phone number not match");
+		if (phoneNumber !== verifyDto.phone) throw new UnauthorizedException("PHONE_MISMATCH");
 
 		// Find user in DB
 		const user = await this.userRepo.findOne({ where: { phone: phoneNumber } });
-		if (!user) throw new UnauthorizedException("Phone number has not registered!");
+		if (!user) throw new UnauthorizedException("PHONE_NOT_REGISTERED");
 
 		// Generate token to login
 		return this.generateTokens(user);

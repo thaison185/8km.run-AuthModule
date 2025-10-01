@@ -3,7 +3,16 @@ import { ConfigService } from "@nestjs/config";
 import { ApiTags } from "@nestjs/swagger";
 import { GoogleAuthService } from "src/modules/google";
 import { AuthService } from "./auth.service";
-import { FirebaseOTPDto, FirebaseVerifyOTPDto, GoogleTokenDto, LoginRequestDto, RegisterRequestDto } from "./dtos";
+import {
+	FirebaseOTPDto,
+	FirebaseVerifyOTPDto,
+	GoogleTokenDto,
+	LoginRequestDto,
+	RegisterRequestDto,
+	SendEmailOtpDto,
+	VerifyEmailOtpDto
+} from "./dtos";
+import { EmailOtpService } from "./email-otp";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -11,6 +20,7 @@ export class AuthController {
 	constructor(
 		private readonly authService: AuthService,
 		private readonly googleAuthService: GoogleAuthService,
+		private readonly emailOtpService: EmailOtpService,
 		private configService: ConfigService
 	) {}
 
@@ -24,12 +34,12 @@ export class AuthController {
 		return this.authService.register(dto);
 	}
 
-	@Post("send-otp")
+	@Post("phone/send-otp")
 	sendOtp(@Body() dto: FirebaseOTPDto) {
 		return this.authService.sendOtp(dto);
 	}
 
-	@Post("verify-otp")
+	@Post("phone/verify-otp")
 	verifyOtp(@Body() dto: FirebaseVerifyOTPDto) {
 		return this.authService.verifyOtp(dto);
 	}
@@ -41,5 +51,15 @@ export class AuthController {
 			success: true,
 			...result
 		};
+	}
+
+	@Post("email/send-otp")
+	async sendEmailOtp(@Body() dto: SendEmailOtpDto) {
+		return this.emailOtpService.sendOtp(dto.email);
+	}
+
+	@Post("email/verify-otp")
+	async verifyEmailOtp(@Body() dto: VerifyEmailOtpDto) {
+		return this.emailOtpService.verifyOtp(dto.email, dto.otp);
 	}
 }
