@@ -53,12 +53,12 @@ export class AuthController {
 		};
 	}
 
-	@Post("email/send-otp")
+	@Post("mail/send-otp")
 	async sendEmailOtp(@Body() dto: SendEmailOtpDto) {
 		return this.emailOtpService.sendOtpTest(dto.email, dto.recaptchaToken);
 	}
 
-	@Post("email/verify-otp")
+	@Post("mail/verify-otp")
 	async verifyEmailOtp(@Body() dto: VerifyEmailOtpDto) {
 		return this.emailOtpService.verifyOtpTest(dto.email, dto.otp);
 	}
