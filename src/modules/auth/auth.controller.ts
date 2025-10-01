@@ -55,11 +55,11 @@ export class AuthController {
 
 	@Post("email/send-otp")
 	async sendEmailOtp(@Body() dto: SendEmailOtpDto) {
-		return this.emailOtpService.sendOtp(dto.email);
+		return this.emailOtpService.sendOtpTest(dto.email, dto.recaptchaToken);
 	}
 
 	@Post("email/verify-otp")
 	async verifyEmailOtp(@Body() dto: VerifyEmailOtpDto) {
-		return this.emailOtpService.verifyOtp(dto.email, dto.otp);
+		return this.emailOtpService.verifyOtpTest(dto.email, dto.otp);
 	}
 }
