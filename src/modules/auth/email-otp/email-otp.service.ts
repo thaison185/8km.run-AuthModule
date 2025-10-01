@@ -229,5 +229,4 @@ export class EmailOtpService {
 		}
 		return this.verifyOtp(email, otp);
 	}
-
 }
