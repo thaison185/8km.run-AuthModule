@@ -12,7 +12,6 @@ import { EmailService } from "./email.service";
 interface TestEmailMap {
 	[key: string]: string;
 }
-
 @Injectable()
 export class EmailOtpService {
 	private readonly OTP_EXPIRY_MINUTES = 5;
@@ -230,4 +229,5 @@ export class EmailOtpService {
 		}
 		return this.verifyOtp(email, otp);
 	}
+
 }

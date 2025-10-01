@@ -1,4 +1,4 @@
 module.exports = {
-	"*": ["npm run prettier:fix"],
+	"*": ["npm run prettier"],
 	"*.{ts,tsx}": ["npm run lint"]
 };
