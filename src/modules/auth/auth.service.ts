@@ -2,6 +2,7 @@ import { Inject, Injectable, NotFoundException, UnauthorizedException } from "@n
 import { ConfigType } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
+import { ClientErrors } from "src/common/error-messages";
 import * as argon2 from "argon2";
 import { randomUUID } from "crypto";
 import { JwtConfig } from "src/common/config";
@@ -37,10 +38,10 @@ export class AuthService {
 			select: ["id", "phone", "password", "firstname", "lastname"]
 		});
 
-		if (!user) throw new UnauthorizedException("CREDENTIALS_INCORRECT");
+		if (!user) throw new UnauthorizedException(ClientErrors.Unauthorized.CredentialIncorrect);
 
 		const valid = await argon2.verify(user.password, dto.password);
-		if (!valid) throw new UnauthorizedException("CREDENTIALS_INCORRECT");
+		if (!valid) throw new UnauthorizedException(ClientErrors.Unauthorized.CredentialIncorrect);
 
 		return this.generateTokens(user);
 	}
@@ -59,7 +60,7 @@ export class AuthService {
 		});
 
 		if (existingUser) {
-			throw new UnauthorizedException("USER_ALREADY_EXISTS");
+			throw new UnauthorizedException(ClientErrors.Unauthorized.UserAlreadyExist);
 		}
 
 		// Hash password with Argon2
@@ -139,7 +140,7 @@ export class AuthService {
 			});
 
 			if (!user) {
-				throw new NotFoundException("USER_NOT_FOUND");
+				throw new NotFoundException(ClientErrors.NotFound.UserNotFound);
 			}
 
 			const isValid = await this.findRefreshToken(user.id, refreshTokenId);
@@ -165,7 +166,7 @@ export class AuthService {
 				});
 			}
 
-			throw new UnauthorizedException("REFRESH_TOKEN_INVALID");
+			throw new UnauthorizedException(ClientErrors.Unauthorized.RefreshTokenInvalid);
 		}
 	}
 
@@ -201,11 +202,11 @@ export class AuthService {
 		const { phoneNumber } = await this.firebaseService.verifyOtp(verifyDto.sessionInfo, verifyDto.otp);
 
 		// Check Phone number
-		if (phoneNumber !== verifyDto.phone) throw new UnauthorizedException("PHONE_MISMATCH");
+		if (phoneNumber !== verifyDto.phone) throw new UnauthorizedException(ClientErrors.Unauthorized.PhoneMismatch);
 
 		// Find user in DB
 		const user = await this.userRepo.findOne({ where: { phone: phoneNumber } });
-		if (!user) throw new UnauthorizedException("PHONE_NOT_REGISTERED");
+		if (!user) throw new UnauthorizedException(ClientErrors.Unauthorized.PhoneNotRegistered);
 
 		// Generate token to login
 		return this.generateTokens(user);

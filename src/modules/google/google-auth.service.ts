@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException, NotFoundException, Unauthoriz
 import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
 import { OAuth2Client } from "google-auth-library";
+import { ClientErrors } from "src/common/error-messages";
 import { User } from "src/core/database/sql/entities/user";
 import { AuthService } from "src/modules/auth/auth.service";
 import { Repository } from "typeorm";
@@ -55,7 +56,7 @@ export class GoogleAuthService {
 			const { tokens } = await this.googleClient.getToken(authCode);
 
 			if (!tokens || !tokens.id_token) {
-				throw new UnauthorizedException("ID_TOKEN_NOT_FOUND");
+				throw new UnauthorizedException(ClientErrors.Unauthorized.IdTokenNotFound);
 			}
 
 			return tokens.id_token;
@@ -65,7 +66,7 @@ export class GoogleAuthService {
 			}
 
 			throw new UnauthorizedException({
-				message: "AUTH_CODE_EXCHANGE_FAILED",
+				message: ClientErrors.Unauthorized.AuthCodeExchangeFailed,
 				error
 			});
 		}
@@ -86,11 +87,11 @@ export class GoogleAuthService {
 			payload = ticket.getPayload();
 
 			if (!payload) {
-				throw new UnauthorizedException("INVALID_TOKEN_PAYLOAD");
+				throw new UnauthorizedException(ClientErrors.Unauthorized.InvalidTokenPayload);
 			}
 
 			if (!payload.email_verified) {
-				throw new UnauthorizedException("EMAIL_NOT_VERIFIED");
+				throw new UnauthorizedException(ClientErrors.Unauthorized.EmailNotVerified);
 			}
 		} catch (error) {
 			if (error instanceof UnauthorizedException) {
@@ -98,7 +99,7 @@ export class GoogleAuthService {
 			}
 
 			throw new UnauthorizedException({
-				message: "TOKEN_VERIFICATION_FAILED",
+				message: ClientErrors.Unauthorized.TokenVerificationFailed,
 				error
 			});
 		}
@@ -122,7 +123,7 @@ export class GoogleAuthService {
 			if (user) {
 				// User exist
 				if (user.googleId && user.googleId !== googleUser.googleId) {
-					throw new UnauthorizedException("GOOGLE_ID_MISMATCH");
+					throw new UnauthorizedException(ClientErrors.Unauthorized.GoogleIdMismatch);
 				}
 
 				// Update google_id if not exist
@@ -133,7 +134,7 @@ export class GoogleAuthService {
 			} else {
 				// Return to frontend to move to registration UI
 				throw new NotFoundException({
-					message: "USER_NOT_FOUND",
+					message: ClientErrors.NotFound.UserNotFound,
 					googleUser: {
 						googleId: googleUser.googleId,
 						email: googleUser.email,
@@ -150,7 +151,7 @@ export class GoogleAuthService {
 			}
 
 			throw new InternalServerErrorException({
-				message: "GOOGLE_LOGIN_FAILED",
+				message: ClientErrors.InternalServerError.GoogleLoginFailed,
 				error
 			});
 		}

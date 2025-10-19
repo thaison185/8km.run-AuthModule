@@ -2,6 +2,7 @@
 import { Inject, Injectable, InternalServerErrorException, UnauthorizedException } from "@nestjs/common";
 import axios from "axios";
 import { app } from "firebase-admin";
+import { ClientErrors } from "src/common/error-messages";
 
 @Injectable()
 export class FirebaseService {
@@ -27,7 +28,7 @@ export class FirebaseService {
 				})
 				.catch((error) => {
 					throw new InternalServerErrorException({
-						message: "SEND_OTP_FAILED",
+						message: ClientErrors.InternalServerError.SendOtpFailed,
 						error: error.response?.data || error.message
 					});
 				});
@@ -37,7 +38,7 @@ export class FirebaseService {
 				throw error;
 			}
 			throw new InternalServerErrorException({
-				message: "SEND_OTP_FAILED",
+				message: ClientErrors.InternalServerError.SendOtpFailed,
 				error
 			});
 		}
@@ -57,7 +58,7 @@ export class FirebaseService {
 			return { phoneNumber: res.data.phoneNumber, idToken: res.data.idToken };
 		} catch (error) {
 			throw new InternalServerErrorException({
-				message: "VERIFY_OTP_FAILED",
+				message: ClientErrors.InternalServerError.VerifyOtpFailed,
 				error
 			});
 		}
@@ -70,11 +71,11 @@ export class FirebaseService {
 		try {
 			const decodedToken = await this.firebaseApp.auth().verifyIdToken(idToken);
 			if (!decodedToken.phone_number) {
-				throw new UnauthorizedException("FIREBASE_ID_TOKEN_INVALID");
+				throw new UnauthorizedException(ClientErrors.Unauthorized.FirebaseIdTokenInvalid);
 			}
 			return decodedToken.phone_number;
 		} catch (error) {
-			throw new UnauthorizedException("FIREBASE_ID_TOKEN_INVALID", error);
+			throw new UnauthorizedException(ClientErrors.Unauthorized.FirebaseIdTokenInvalid, error);
 		}
 	}
 

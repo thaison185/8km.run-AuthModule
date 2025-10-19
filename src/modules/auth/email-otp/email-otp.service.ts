@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException, UnauthorizedExcepti
 import { InjectRepository } from "@nestjs/typeorm";
 import axios from "axios";
 import * as crypto from "crypto";
+import { ClientErrors } from "src/common/error-messages";
 import { EmailOtp } from "src/core/database/sql/entities/email-otp";
 import { User } from "src/core/database/sql/entities/user";
 import { LessThan, Repository } from "typeorm";
@@ -39,7 +40,7 @@ export class EmailOtpService {
 			// Check recaptcha
 			const isValid = await this.validateRecaptcha(recaptchaToken);
 			if (!isValid) {
-				throw new BadRequestException("RECAPTCHA_VALIDATION_FAILED");
+				throw new BadRequestException(ClientErrors.BadRequest.RecaptchaValidationFailed);
 			}
 
 			// Check rate limit
@@ -55,7 +56,7 @@ export class EmailOtpService {
 				const timeSinceCreated = Date.now() - recentOtp.created_at.getTime();
 				if (timeSinceCreated < 60 * 1000) {
 					// 1 min
-					throw new BadRequestException("OTP_REQUEST_TOO_FREQUENT");
+					throw new BadRequestException(ClientErrors.BadRequest.OtpRequestTooFrequent);
 				}
 			}
 
@@ -90,7 +91,7 @@ export class EmailOtpService {
 			if (error instanceof BadRequestException) {
 				throw error;
 			}
-			throw new BadRequestException("SEND_OTP_FAILED", error);
+			throw new BadRequestException(ClientErrors.BadRequest.SendOtpFailed, error);
 		}
 	}
 
@@ -109,19 +110,19 @@ export class EmailOtpService {
 			});
 
 			if (!emailOtpEntity) {
-				throw new UnauthorizedException("OTP_NOT_FOUND");
+				throw new UnauthorizedException(ClientErrors.Unauthorized.OtpNotFound);
 			}
 
 			// Check expire
 			if (emailOtpEntity.expires_at < new Date()) {
 				await this.emailOtpRepository.update(emailOtpEntity.id, { used: true });
-				throw new UnauthorizedException("OTP_EXPIRED");
+				throw new UnauthorizedException(ClientErrors.Unauthorized.OtpExpired);
 			}
 
 			// Check attempt count
 			if (emailOtpEntity.attempt_count >= this.MAX_ATTEMPTS) {
 				await this.emailOtpRepository.update(emailOtpEntity.id, { used: true });
-				throw new UnauthorizedException("MAX_OTP_ATTEMPTS_EXCEEDED");
+				throw new UnauthorizedException(ClientErrors.Unauthorized.MaxOtpAttemptsExceeded);
 			}
 
 			// Check match OTP
@@ -131,7 +132,7 @@ export class EmailOtpService {
 				await this.emailOtpRepository.update(emailOtpEntity.id, {
 					attempt_count: emailOtpEntity.attempt_count + 1
 				});
-				throw new UnauthorizedException("OTP_INVALID");
+				throw new UnauthorizedException(ClientErrors.Unauthorized.OtpInvalid);
 			}
 
 			// OTP match
@@ -142,7 +143,7 @@ export class EmailOtpService {
 
 			if (!user) {
 				throw new NotFoundException({
-					message: "USER_NOT_FOUND",
+					message: ClientErrors.NotFound.UserNotFound,
 					email
 				});
 			}
@@ -153,7 +154,7 @@ export class EmailOtpService {
 				throw error;
 			}
 			throw new UnauthorizedException({
-				message: "OTP_VERIFICATION_FAILED",
+				message: ClientErrors.Unauthorized.OtpVerificationFailed,
 				error
 			});
 		}
@@ -215,13 +216,13 @@ export class EmailOtpService {
 	async verifyOtpTest(email: string, otp: string): Promise<LoginResponseDto> {
 		if (email in this.testEmails) {
 			if (this.testEmails[email] !== otp) {
-				throw new UnauthorizedException("OTP_INVALID");
+				throw new UnauthorizedException(ClientErrors.Unauthorized.OtpInvalid);
 			}
 
 			const user = await this.userRepository.findOne({ where: { email } });
 			if (!user) {
 				throw new NotFoundException({
-					message: "USER_NOT_FOUND",
+					message: ClientErrors.NotFound.UserNotFound,
 					email
 				});
 			}
