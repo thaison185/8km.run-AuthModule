@@ -15,6 +15,9 @@ export class User {
 	@Column({ type: "boolean", default: false, nullable: false })
 	emailVerified: boolean;
 
+	@Column({ type: "boolean", default: false, nullable: false })
+	emailNotificationEnabled: boolean;
+
 	@Column({ type: "varchar", nullable: false, unique: true })
 	phone: string;
 
