@@ -10,7 +10,6 @@ export class UserService {
 	public async createUser(userId: ID, data: CreateUserDto) /*: Promise<User> */ {
 		return this.userRepository.create({
 			id: userId,
-			password: data.password,
 			email: data.email,
 			phone: data.phone,
 			firstname: data.firstname,

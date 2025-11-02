@@ -9,14 +9,14 @@ export class User {
 	@PrimaryGeneratedColumn("uuid")
 	id: ID;
 
-	@Column({ type: "varchar", nullable: false, unique: true })
+	@Column({ type: "varchar", nullable: true, unique: true })
 	email: string;
+
+	@Column({ type: "boolean", default: false, nullable: false })
+	emailVerified: boolean;
 
 	@Column({ type: "varchar", nullable: false, unique: true })
 	phone: string;
-
-	@Column({ type: "varchar", nullable: false })
-	password: string;
 
 	@Column({ type: "varchar", nullable: false })
 	firstname: string;
@@ -41,6 +41,12 @@ export class User {
 
 	@Column({ type: "json", nullable: true })
 	clubs: Club;
+
+	@Column({ type: "varchar", nullable: true })
+	emergencyContactName: string;
+
+	@Column({ type: "varchar", nullable: true })
+	emergencyContactPhone: string;
 
 	@OneToMany(() => Record, (record) => record.user)
 	records: Record[];

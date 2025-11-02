@@ -7,7 +7,6 @@ import {
 	FirebaseOTPDto,
 	FirebaseVerifyOTPDto,
 	GoogleTokenDto,
-	LoginRequestDto,
 	RegisterRequestDto,
 	SendEmailOtpDto,
 	VerifyEmailOtpDto
@@ -23,11 +22,6 @@ export class AuthController {
 		private readonly emailOtpService: EmailOtpService,
 		private configService: ConfigService
 	) {}
-
-	@Post("login")
-	async login(@Body() dto: LoginRequestDto) {
-		return this.authService.login(dto);
-	}
 
 	@Post("register")
 	async register(@Body() dto: RegisterRequestDto) {

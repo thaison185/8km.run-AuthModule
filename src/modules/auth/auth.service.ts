@@ -2,22 +2,14 @@ import { Inject, Injectable, NotFoundException, UnauthorizedException } from "@n
 import { ConfigType } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ClientErrors } from "src/common/error-messages";
-import * as argon2 from "argon2";
 import { randomUUID } from "crypto";
 import { JwtConfig } from "src/common/config";
+import { ClientErrors } from "src/common/error-messages";
 import { RefreshToken } from "src/core/database/sql/entities/refresh-token";
 import { User } from "src/core/database/sql/entities/user";
 import { Repository } from "typeorm";
 import { FirebaseService } from "../firebase";
-import {
-	FirebaseOTPDto,
-	FirebaseVerifyOTPDto,
-	LoginRequestDto,
-	LoginResponseDto,
-	RefreshTokenDto,
-	RegisterRequestDto
-} from "./dtos";
+import { FirebaseOTPDto, FirebaseVerifyOTPDto, LoginResponseDto, RefreshTokenDto, RegisterRequestDto } from "./dtos";
 
 @Injectable()
 export class AuthService {
@@ -31,20 +23,6 @@ export class AuthService {
 		@Inject(JwtConfig.KEY)
 		private readonly jwtConfiguration: ConfigType<typeof JwtConfig>
 	) {}
-
-	async login(dto: LoginRequestDto): Promise<LoginResponseDto> {
-		const user = await this.userRepo.findOne({
-			where: [{ phone: dto.phone }],
-			select: ["id", "phone", "password", "firstname", "lastname"]
-		});
-
-		if (!user) throw new UnauthorizedException(ClientErrors.Unauthorized.CredentialIncorrect);
-
-		const valid = await argon2.verify(user.password, dto.password);
-		if (!valid) throw new UnauthorizedException(ClientErrors.Unauthorized.CredentialIncorrect);
-
-		return this.generateTokens(user);
-	}
 
 	// Dummy Logout for testing
 	async logout(user_id: string): Promise<void> {
@@ -63,11 +41,8 @@ export class AuthService {
 			throw new UnauthorizedException(ClientErrors.Unauthorized.UserAlreadyExist);
 		}
 
-		// Hash password with Argon2
-		const hashedPassword = await argon2.hash(registerDto.password, { type: argon2.argon2id });
-
 		// Return User[] here
-		const userEntity = this.userRepo.create({ ...registerDto, password: hashedPassword });
+		const userEntity = this.userRepo.create({ ...registerDto });
 		const user = await this.userRepo.save(userEntity);
 
 		// But generateTokens need User param
