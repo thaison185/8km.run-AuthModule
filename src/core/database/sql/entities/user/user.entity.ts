@@ -3,6 +3,7 @@ import { ID } from "src/common/types";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Club } from "../../models/club.model";
 import { Record } from "../record";
+import { Session } from "../session";
 
 @Entity("users")
 export class User {
@@ -53,6 +54,9 @@ export class User {
 
 	@OneToMany(() => Record, (record) => record.user)
 	records: Record[];
+
+	@OneToMany(() => Session, (session) => session.user, { cascade: true })
+	sessions: Session[];
 
 	@Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", nullable: false })
 	createdAt: Date;
