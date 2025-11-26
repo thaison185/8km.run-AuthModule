@@ -6,7 +6,18 @@ import { LocationDetail } from "./locationDetail";
 import { Record } from "./record";
 import { RefreshToken } from "./refresh-token";
 import { Region } from "./region";
-import { User } from "./user";
 import { Session } from "./session";
+import { User } from "./user";
 
-export const entities = [User, Location, Donation, Event, Record, Region, LocationDetail, RefreshToken, EmailOtp, Session];
+export const entities = [
+	User,
+	Location,
+	Donation,
+	Event,
+	Record,
+	Region,
+	LocationDetail,
+	RefreshToken,
+	EmailOtp,
+	Session
+];

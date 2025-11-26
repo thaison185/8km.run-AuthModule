@@ -1,38 +1,38 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { User } from '../user';
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { User } from "../user";
 
-@Entity('sessions')
+@Entity("sessions")
 export class Session {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+	@PrimaryGeneratedColumn("uuid")
+	id: string;
 
-    @Column()
-    userId: string;
+	@Column()
+	userId: string;
 
-    @Column()
-    userAgent: string;
+	@Column()
+	userAgent: string;
 
-    @Column({ nullable: true })
-    ip?: string;
+	@Column({ nullable: true })
+	ip?: string;
 
-    @Column({ nullable: true })
-    device?: string;
+	@Column({ nullable: true })
+	device?: string;
 
-    @Column({ nullable: true })
-    country?: string;
+	@Column({ nullable: true })
+	country?: string;
 
-    @Column({ type: 'boolean', default: true })
-    status: boolean; // true = active, false = revoked
+	@Column({ type: "boolean", default: true })
+	status: boolean; // true = active, false = revoked
 
-    @Column()
-    expiresAt: Date;
+	@Column()
+	expiresAt: Date;
 
-    @CreateDateColumn()
-    createdAt: Date;
+	@CreateDateColumn()
+	createdAt: Date;
 
-    @UpdateDateColumn()
-    updatedAt: Date;
+	@UpdateDateColumn()
+	updatedAt: Date;
 
-    @ManyToOne(() => User, (user) => user.sessions, { onDelete: 'CASCADE' })
-    user: User;
+	@ManyToOne(() => User, (user) => user.sessions, { onDelete: "CASCADE" })
+	user: User;
 }

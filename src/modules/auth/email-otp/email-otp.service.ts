@@ -98,7 +98,7 @@ export class EmailOtpService {
 	/**
 	 * Verify OTP and Login
 	 */
-	async verifyOtp(email: string, otp: string): Promise<LoginResponseDto> {
+	async verifyOtp(email: string, otp: string, userAgent: string, ip: string): Promise<LoginResponseDto> {
 		try {
 			// Find unused OTP
 			const emailOtpEntity = await this.emailOtpRepository.findOne({
@@ -148,7 +148,7 @@ export class EmailOtpService {
 				});
 			}
 
-			return await this.authService.generateTokens(user);
+			return await this.authService.createSessionAndTokens(user, userAgent, ip);
 		} catch (error) {
 			if (error instanceof UnauthorizedException || error instanceof NotFoundException) {
 				throw error;
@@ -213,7 +213,7 @@ export class EmailOtpService {
 		return this.sendOtp(email, recaptchaToken);
 	}
 
-	async verifyOtpTest(email: string, otp: string): Promise<LoginResponseDto> {
+	async verifyOtpTest(email: string, otp: string, userAgent: string, ip: string): Promise<LoginResponseDto> {
 		if (email in this.testEmails) {
 			if (this.testEmails[email] !== otp) {
 				throw new UnauthorizedException(ClientErrors.Unauthorized.OtpInvalid);
@@ -226,8 +226,8 @@ export class EmailOtpService {
 					email
 				});
 			}
-			return this.authService.generateTokens(user);
+			return this.authService.createSessionAndTokens(user, userAgent, ip);
 		}
-		return this.verifyOtp(email, otp);
+		return this.verifyOtp(email, otp, userAgent, ip);
 	}
 }

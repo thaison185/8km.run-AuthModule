@@ -1,6 +1,7 @@
 export interface IJwt {
-	id: number;
-	session: number;
+	id: string;
+	session: string;
+	data?: Record<string, string | number>;
 	iat?: number;
 	exp?: number;
 }

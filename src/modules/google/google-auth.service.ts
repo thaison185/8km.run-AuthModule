@@ -25,6 +25,10 @@ export interface GoogleUser {
 export class GoogleAuthService {
 	private googleClient: OAuth2Client;
 
+	private userAgent: string;
+
+	private ip: string;
+
 	constructor(
 		@InjectRepository(User)
 		private userRepository: Repository<User>,
@@ -42,9 +46,10 @@ export class GoogleAuthService {
 	 * Main handler login with google method
 	 */
 
-	async loginWithGoogle(authCode: string) {
+	async loginWithGoogle(authCode: string, userAgent: string, ip: string) {
 		const idToken = await this.exchangeAuthCode(authCode);
-
+		this.userAgent = userAgent;
+		this.ip = ip;
 		return this.handleGoogleTokenLogin(idToken);
 	}
 
@@ -144,7 +149,7 @@ export class GoogleAuthService {
 			}
 
 			// Generate JWT tokens
-			return await this.authService.generateTokens(user);
+			return await this.authService.createSessionAndTokens(user, this.userAgent, this.ip);
 		} catch (error) {
 			if (error instanceof UnauthorizedException || error instanceof NotFoundException) {
 				throw error;

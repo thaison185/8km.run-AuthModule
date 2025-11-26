@@ -27,7 +27,10 @@ export const ClientErrors = {
 		InvalidTokenPayload: "INVALID_TOKEN_PAYLOAD",
 		TokenVerificationFailed: "TOKEN_VERIFICATION_FAILED",
 		EmailNotVerified: "EMAIL_NOT_VERIFIED",
-		GoogleIdMismatch: "GOOGLE_ID_MISMATCH"
+		GoogleIdMismatch: "GOOGLE_ID_MISMATCH",
+		TokenNotFound: "TOKEN_NOT_FOUND",
+		SessionNotFoundOrInvalid: "SESSION_NOT_FOUND_OR_INVALID",
+		TokenExpired: "TOKEN_EXPIRED"
 	},
 	InternalServerError: {
 		code: 500,

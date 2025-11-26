@@ -5,7 +5,10 @@ import { AppModule } from "./app.module";
 import { initSwagger } from "./app.swagger";
 
 async function bootstrap() {
-	const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
+	const fastifyAdapter = new FastifyAdapter();
+	fastifyAdapter.getInstance().decorateRequest("user", null);
+
+	const app = await NestFactory.create<NestFastifyApplication>(AppModule, fastifyAdapter, {
 		cors: { origin: true, credentials: true }
 	});
 
