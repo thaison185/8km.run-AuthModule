@@ -48,7 +48,7 @@ export class AuthGuard implements CanActivate {
 				throw new UnauthorizedException(ClientErrors.Unauthorized.SessionNotFoundOrInvalid);
 			}
 
-			// Gán user vào request
+			// Add user to request
 			request.user = { ...payload, ...sessionData };
 			return true;
 		} catch (error) {

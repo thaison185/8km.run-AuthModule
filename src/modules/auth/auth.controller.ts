@@ -1,5 +1,4 @@
 import { Body, Controller, Post } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { ApiTags } from "@nestjs/swagger";
 import { Public } from "src/common/decorators/public.decorator";
 import { RequestContext } from "src/common/decorators/request-context.decorator";
@@ -23,7 +22,6 @@ export class AuthController {
 		private readonly authService: AuthService,
 		private readonly googleAuthService: GoogleAuthService,
 		private readonly emailOtpService: EmailOtpService,
-		private configService: ConfigService
 	) {}
 
 	@Post("register")
@@ -69,5 +67,11 @@ export class AuthController {
 	@Post("logout")
 	async logout(@Body() dto: RefreshTokenDto) {
 		return this.authService.logout(dto.refreshToken);
+	}
+
+	@Post("refresh-token")
+	@Public()
+	async refreshToken(@Body() dto: RefreshTokenDto, @RequestContext() context: {ip: string; userAgent: string}) {
+		return this.authService.refreshTokens(dto.refreshToken, context.userAgent, context.ip);
 	}
 }
