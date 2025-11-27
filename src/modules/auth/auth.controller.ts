@@ -21,7 +21,7 @@ export class AuthController {
 	constructor(
 		private readonly authService: AuthService,
 		private readonly googleAuthService: GoogleAuthService,
-		private readonly emailOtpService: EmailOtpService,
+		private readonly emailOtpService: EmailOtpService
 	) {}
 
 	@Post("register")
@@ -71,7 +71,7 @@ export class AuthController {
 
 	@Post("refresh-token")
 	@Public()
-	async refreshToken(@Body() dto: RefreshTokenDto, @RequestContext() context: {ip: string; userAgent: string}) {
+	async refreshToken(@Body() dto: RefreshTokenDto, @RequestContext() context: { ip: string; userAgent: string }) {
 		return this.authService.refreshTokens(dto.refreshToken, context.userAgent, context.ip);
 	}
 }

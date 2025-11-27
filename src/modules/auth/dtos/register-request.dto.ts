@@ -10,7 +10,7 @@ const RegisterSchema = z.object({
 	dob: z.string().date().optional(),
 	gender: genderSchema.optional(),
 	is_pic: z.boolean().optional(),
-	qrCode: z.string().trim().max(100).optional(),
+	qrCode: z.string().trim().max(100).optional()
 });
 
 export class RegisterRequestDto extends createZodDto(RegisterSchema) {}
